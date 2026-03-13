@@ -5,4 +5,4 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "FORMS_DB"
 database_name = "forms-db"
-database_id = "test"
+database_id = "97e5eec7-5eb3-4d63-ba8e-8d8cf2f0b186"
