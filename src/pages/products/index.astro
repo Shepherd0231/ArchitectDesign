@@ -1,0 +1,92 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProductCard from "../../components/cards/ProductCard.astro";
+import CTA from "../../components/sections/CTA.astro";
+import Container from "../../components/ui/Container.astro";
+import SectionTitle from "../../components/ui/SectionTitle.astro";
+
+import { getCollection } from "astro:content";
+import { fetchCases, sanityAvailable } from '../../lib/sanity/api';
+import { normalizeSanityLocale } from '../../lib/sanity/env';
+import { resolveImageUrl } from "../../lib/content/images";
+import { getLocaleFromPathname, localizePath } from "../../lib/i18n/routing";
+import { pickLocale } from "../../lib/i18n/content";
+
+const lang = getLocaleFromPathname(Astro.url.pathname);
+const locale = normalizeSanityLocale(lang);
+let cases = [] as Array<{
+  slug: string;
+  title: string;
+  description: string;
+  isFeatured?: boolean;
+  publishDate: string;
+  coverImage: string;
+  coverImageMeta?: { alt?: string };
+  client?: string;
+  location?: string;
+  year?: number;
+  tags?: string[];
+}>;
+
+if (sanityAvailable()) {
+  const sanityCases = await fetchCases(locale);
+  cases = sanityCases.length
+    ? sanityCases
+    : pickLocale(await getCollection('cases'), lang).map((entry) => ({
+        slug: entry.id,
+        title: entry.data.title,
+        description: entry.data.description,
+        isFeatured: entry.data.isFeatured,
+        publishDate: entry.data.publishDate.toISOString().slice(0, 10),
+        coverImage: resolveImageUrl(entry.data.coverImage) ?? entry.data.coverImage,
+        coverImageMeta: entry.data.coverImageMeta,
+        client: entry.data.client,
+        location: entry.data.location,
+        year: entry.data.year,
+        tags: entry.data.tags,
+      }));
+} else {
+  cases = pickLocale(await getCollection('cases'), lang).map((entry) => ({
+    slug: entry.id,
+    title: entry.data.title,
+    description: entry.data.description,
+    isFeatured: entry.data.isFeatured,
+    publishDate: entry.data.publishDate.toISOString().slice(0, 10),
+    coverImage: resolveImageUrl(entry.data.coverImage) ?? entry.data.coverImage,
+    coverImageMeta: entry.data.coverImageMeta,
+    client: entry.data.client,
+    location: entry.data.location,
+    year: entry.data.year,
+    tags: entry.data.tags,
+  }));
+}
+
+export const prerender = true;
+
+const ogImage = cases[0]?.coverImage;
+---
+
+<BaseLayout title="设计案例 | AstroMeta 事务所" description="浏览我们的代表作品，涵盖极简住宅、现代商业及文化建筑设计。" image={ogImage}>
+    <Container className="py-24 lg:py-32">
+        <SectionTitle 
+            title="精选设计方案" 
+            subtitle="作品全集" 
+            align="left" 
+            as="h1"
+            className="mb-16"
+        />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            {cases.map(caseItem => (
+                <ProductCard product={caseItem} slug={caseItem.slug} />
+            ))}
+        </div>
+    </Container>
+
+    <CTA 
+        title="定制您的独特空间" 
+        description="我们的团队将为您提供从概念设计到施工落地的全流程咨询服务。" 
+        buttonText="开始咨询" 
+        buttonLink={localizePath("/contact", lang)}
+    />
+</BaseLayout>

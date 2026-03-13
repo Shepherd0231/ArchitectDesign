@@ -1,0 +1,115 @@
+---
+interface Channel {
+  type: 'email' | 'whatsapp' | 'wechat' | 'phone' | 'instagram' | 'facebook' | 'xhs';
+  label: string;
+  value: string;
+  href?: string;
+}
+
+interface Props {
+  title?: string;
+  channels?: Channel[];
+}
+
+const {
+  title = '项目咨询',
+  channels = [],
+} = Astro.props;
+---
+
+<div class="fixed bottom-8 right-8 z-40 flex flex-col gap-4 items-end">
+  <div
+    id="contact-panel"
+    class="hidden bg-white border border-border-soft p-6 shadow-2xl mb-2 animate-slide-up"
+    role="dialog"
+    aria-modal="false"
+    aria-labelledby="contact-panel-title"
+    tabindex="-1"
+  >
+    <h4 id="contact-panel-title" class="text-[10px] uppercase tracking-widest font-bold mb-6 text-accent-gold border-b border-border-soft pb-2">{title}</h4>
+    <div class="space-y-6">
+      {channels.map((channel) => (
+        <div class="flex flex-col gap-1">
+          <span class="text-[10px] text-text-secondary uppercase tracking-tighter">{channel.label}</span>
+          {channel.href ? (
+            (() => {
+              const isExternal = /^https?:\/\//i.test(channel.href ?? '');
+              return (
+                <a
+                  href={channel.href}
+                  target={isExternal ? "_blank" : undefined}
+                  rel={isExternal ? "noreferrer" : undefined}
+                  class="text-xs font-medium tracking-wide no-underline text-primary-brand hover:text-accent-gold transition-colors"
+                >
+                  {channel.value}
+                </a>
+              );
+            })()
+          ) : (
+            <span class="text-xs font-medium tracking-wide">{channel.value}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+  
+  <button 
+    id="toggle-contact"
+    class="w-14 h-14 bg-primary-brand text-white flex items-center justify-center hover:bg-black transition-all duration-500 shadow-xl"
+    aria-label="打开联系信息"
+    aria-controls="contact-panel"
+    aria-expanded="false"
+  >
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+    </svg>
+  </button>
+</div>
+
+<script>
+  const toggleBtn = document.getElementById('toggle-contact');
+  const panel = document.getElementById('contact-panel');
+
+  function isOpen() {
+    return panel && !panel.classList.contains('hidden');
+  }
+
+  function open() {
+    if (!panel || !toggleBtn) return;
+    panel.classList.remove('hidden');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    toggleBtn.setAttribute('aria-label', '关闭联系信息');
+    panel.focus();
+  }
+
+  function close() {
+    if (!panel || !toggleBtn) return;
+    panel.classList.add('hidden');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    toggleBtn.setAttribute('aria-label', '打开联系信息');
+    toggleBtn.focus();
+  }
+
+  toggleBtn?.addEventListener('click', () => {
+    if (isOpen()) close();
+    else open();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) close();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!isOpen() || !panel || !toggleBtn) return;
+    const t = e.target;
+    if (t instanceof Node && !panel.contains(t) && !toggleBtn.contains(t)) close();
+  });
+</script>
+
+<style>
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up { animation: slide-up 0.4s ease-out forwards; }
+</style>

@@ -1,0 +1,62 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/ui/Container.astro";
+import SectionTitle from "../../components/ui/SectionTitle.astro";
+import ResponsivePicture from "../../components/ui/ResponsivePicture.astro";
+
+export const prerender = true;
+
+const lang = "en";
+const aboutImage = "https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&w=1200&q=80";
+---
+
+<BaseLayout
+  title="About Us | AstroMeta"
+  description="Learn about our design philosophy, team, and how we shape spaces that last."
+  image={aboutImage}
+  locale={lang}
+>
+  <Container className="py-24 lg:py-32">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+      <div class="lg:col-span-6">
+        <SectionTitle title="Pure. Quiet. Timeless." subtitle="Our Story" align="left" as="h1" />
+        <div class="mt-12 space-y-6 text-text-secondary leading-relaxed">
+          <p>
+            Founded in 2015, AstroMeta is a boutique architecture studio based in Shanghai. We believe architecture is
+            more than construction — it’s a vessel for light, material, and emotion.
+          </p>
+          <p>
+            Over the past decade, we’ve stayed away from short-lived trends and focused on an inside-out design logic.
+            From private residences to commercial spaces, we search for the right spatial order for each project and
+            deliver calm, enduring works with human warmth.
+          </p>
+        </div>
+
+        <div class="mt-16 grid grid-cols-2 gap-12 border-t border-border-soft pt-12">
+          <div>
+            <h4 class="text-[10px] uppercase tracking-widest font-bold mb-4 text-accent-gold">Design Values</h4>
+            <p class="text-sm">Minimal, Pure, Timeless, Natural</p>
+          </div>
+          <div>
+            <h4 class="text-[10px] uppercase tracking-widest font-bold mb-4 text-accent-gold">Services</h4>
+            <p class="text-sm">Architecture, Interior, Landscape</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-6">
+        <div class="aspect-[4/5] bg-gray-100 relative overflow-hidden">
+          <ResponsivePicture
+            src={aboutImage}
+            alt="Studio Space"
+            width={960}
+            height={1200}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className="w-full h-full object-cover grayscale"
+          />
+        </div>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>
+

@@ -1,0 +1,190 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/sections/Hero.astro";
+import Features from "../../components/sections/Features.astro";
+import CTA from "../../components/sections/CTA.astro";
+import FAQ from "../../components/sections/FAQ.astro";
+import Testimonials from "../../components/sections/Testimonials.astro";
+import ProductCard from "../../components/cards/ProductCard.astro";
+import Container from "../../components/ui/Container.astro";
+import SectionTitle from "../../components/ui/SectionTitle.astro";
+
+import { getCollection } from "astro:content";
+import { fetchCases, sanityAvailable } from "../../lib/sanity/api";
+import { normalizeSanityLocale } from "../../lib/sanity/env";
+import { resolveImageUrl } from "../../lib/content/images";
+import { pickLocale } from "../../lib/i18n/content";
+import { localizePath } from "../../lib/i18n/routing";
+
+export const prerender = true;
+
+const lang = "es";
+const locale = normalizeSanityLocale(lang);
+const useSanity = sanityAvailable();
+
+let featuredCases = [] as Array<{
+  slug: string;
+  title: string;
+  description: string;
+  isFeatured?: boolean;
+  publishDate: string;
+  coverImage: string;
+  coverImageMeta?: { alt?: string };
+}>;
+
+if (useSanity) {
+  const sanityCases = await fetchCases(locale);
+  featuredCases = sanityCases.length
+    ? sanityCases.filter((c) => c.isFeatured === true)
+    : pickLocale(await getCollection("cases"), lang)
+        .filter((entry) => entry.data.isFeatured === true)
+        .map((entry) => ({
+          slug: entry.id,
+          title: entry.data.title,
+          description: entry.data.description,
+          isFeatured: entry.data.isFeatured,
+          publishDate: entry.data.publishDate.toISOString().slice(0, 10),
+          coverImage: resolveImageUrl(entry.data.coverImage) ?? entry.data.coverImage,
+          coverImageMeta: entry.data.coverImageMeta,
+        }));
+} else {
+  featuredCases = pickLocale(await getCollection("cases"), lang)
+    .filter((entry) => entry.data.isFeatured === true)
+    .map((entry) => ({
+      slug: entry.id,
+      title: entry.data.title,
+      description: entry.data.description,
+      isFeatured: entry.data.isFeatured,
+      publishDate: entry.data.publishDate.toISOString().slice(0, 10),
+      coverImage: resolveImageUrl(entry.data.coverImage) ?? entry.data.coverImage,
+      coverImageMeta: entry.data.coverImageMeta,
+    }));
+}
+
+const heroImage = "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1200&q=80";
+---
+
+<BaseLayout
+  title="Arte Espacial | Estudio de Arquitectura Minimalista"
+  description="Exploramos la esencia de la vida a través del diseño espacial sobrio. Proyectos residenciales, comerciales y culturales."
+  image={heroImage}
+  locale={lang}
+>
+  <Fragment slot="head">
+    <link rel="preload" as="image" href={heroImage} imagesizes="100vw" fetchpriority="high" />
+  </Fragment>
+
+  <Hero
+    title="Replanteamos el orden y la belleza del espacio"
+    subtitle="La arquitectura es un contenedor de la vida. Creamos espacios atemporales con un lenguaje de diseño sobrio."
+    image={heroImage}
+    badgeText="Estudio de Arquitectura y Diseño"
+    primaryCtaText="Agendar consulta"
+    primaryCtaHref={localizePath("/contact", lang)}
+    secondaryCtaText="Ver proyectos"
+    secondaryCtaHref={localizePath("/products", lang)}
+  />
+
+  <Container className="grid grid-cols-2 md:grid-cols-4 gap-12 py-20 border-y border-border-soft mb-20">
+    <div class="text-center">
+      <p class="text-3xl font-serif text-text-primary mb-2">15+</p>
+      <p class="text-text-secondary text-xs uppercase tracking-widest">Años</p>
+    </div>
+    <div class="text-center">
+      <p class="text-3xl font-serif text-text-primary mb-2">300+</p>
+      <p class="text-text-secondary text-xs uppercase tracking-widest">Proyectos</p>
+    </div>
+    <div class="text-center">
+      <p class="text-3xl font-serif text-text-primary mb-2">30+</p>
+      <p class="text-text-secondary text-xs uppercase tracking-widest">Premios</p>
+    </div>
+    <div class="text-center">
+      <p class="text-3xl font-serif text-text-primary mb-2">100%</p>
+      <p class="text-text-secondary text-xs uppercase tracking-widest">Original</p>
+    </div>
+  </Container>
+
+  <Container className="mb-24">
+    <SectionTitle title="Proyectos Destacados" subtitle="Selección" align="left" as="h1" className="mb-16" />
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+      {featuredCases.map((caseItem) => (
+        <ProductCard product={caseItem} slug={caseItem.slug} />
+      ))}
+    </div>
+  </Container>
+
+  <Features
+    title="Cómo definimos el espacio"
+    subtitle="Principios"
+    intro="Cada proyecto comienza con una conversación profunda sobre el estilo de vida. Buscamos valor atemporal, no tendencias."
+    features={[
+      {
+        title: "Filosofía minimalista",
+        description: "Eliminar lo redundante y volver a la esencia. Geometría pura para entornos serenos y restauradores.",
+      },
+      {
+        title: "La luz como narrativa",
+        description: "La arquitectura organiza la luz. Estudiamos el movimiento del día para dar ritmo y vida al espacio.",
+      },
+      {
+        title: "Construcción sostenible",
+        description: "Materiales naturales y estrategias de edificación verde para confort y durabilidad a largo plazo.",
+      },
+    ]}
+  />
+
+  <Testimonials
+    title="Voces de Clientes"
+    subtitle="Testimonios"
+    testimonials={[
+      {
+        quote:
+          "Más allá de la estética, su control de la luz y la ventilación convirtió mi hogar en un verdadero refugio.",
+        author: "Sr. Zhang",
+        role: "Propietario de Villa",
+      },
+      {
+        quote:
+          "Equilibraron la rudeza del patrimonio industrial con una oficina moderna y refinada. Superó lo esperado.",
+        author: "Sra. Li",
+        role: "Directora de Parque Creativo",
+      },
+      {
+        quote:
+          "Minimalista pero nada simple. La calidad y los detalles son casi impecables, algo poco común en el sector.",
+        author: "Sr. Wang",
+        role: "Fundador de Hotel Boutique",
+      },
+    ]}
+  />
+
+  <FAQ
+    title="Preguntas Frecuentes"
+    subtitle="Proceso"
+    intro="Si tienes dudas específicas, agenda una llamada 1:1 con nuestro consultor de diseño."
+    faqs={[
+      {
+        question: "¿Cuánto dura el proceso de diseño?",
+        answer:
+          "La etapa conceptual suele durar 4–8 semanas, según la escala y complejidad. Diseñamos con calma para cuidar cada detalle.",
+      },
+      {
+        question: "¿Ofrecen supervisión en obra?",
+        answer:
+          "Sí. Ofrecemos supervisión durante todo el proyecto con visitas periódicas para asegurar la ejecución según la intención del diseño.",
+      },
+      {
+        question: "¿Cómo definimos un presupuesto adecuado?",
+        answer:
+          "En la primera consulta, estimamos el rango según tus objetivos. Buscamos maximizar el valor espacial dentro del presupuesto.",
+      },
+    ]}
+  />
+
+  <CTA
+    title="¿Listo para empezar tu proyecto?"
+    description="Desde viviendas privadas hasta espacios comerciales, aportamos una perspectiva arquitectónica distintiva."
+    buttonText="Agendar consulta"
+    buttonLink={localizePath("/contact", lang)}
+  />
+</BaseLayout>

@@ -1,0 +1,52 @@
+---
+import ResponsivePicture from "../ui/ResponsivePicture.astro";
+import { getLocaleFromPathname, localizePath } from "../../lib/i18n/routing";
+import { t } from "../../lib/i18n/messages";
+
+interface Props {
+  product: {
+    title: string;
+    description: string;
+    coverImage: string;
+    coverImageMeta?: {
+      alt?: string;
+    };
+  };
+  slug: string;
+}
+
+const { product, slug } = Astro.props;
+const locale = getLocaleFromPathname(Astro.url.pathname);
+const href = localizePath(`/products/${slug}`, locale);
+---
+
+<div class="group flex flex-col bg-white border border-border-soft overflow-hidden transition-all duration-700 hover:border-accent-gold">
+  <a href={href} class="relative block aspect-[3/4] overflow-hidden">
+    <ResponsivePicture
+      src={product.coverImage}
+      alt={product.coverImageMeta?.alt ?? product.title}
+      width={900}
+      height={1200}
+      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+      className="w-full h-full object-cover grayscale-[0.2] group-hover:scale-110 group-hover:grayscale-0 transition-all duration-1000"
+    />
+    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-700"></div>
+  </a>
+  
+  <div class="p-8 flex flex-col flex-grow">
+    <h3 class="text-xl font-heading mb-4 group-hover:text-accent-gold transition-colors duration-500">
+      <a href={href} class="no-underline text-current">
+        {product.title}
+      </a>
+    </h3>
+    <p class="text-text-secondary text-sm leading-relaxed mb-8 flex-grow">
+      {product.description}
+    </p>
+    <div class="mt-auto">
+      <a href={href} class="inline-flex items-center text-[10px] uppercase tracking-[0.2em] font-bold text-primary-brand hover:text-accent-gold transition-colors group/link">
+        {t(locale, 'products', 'explore')}
+        <span class="ml-2 group-hover/link:translate-x-1 transition-transform">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+name = "astro-meta"
+compatibility_date = "2026-03-13"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "FORMS_DB"
+database_name = "forms-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+

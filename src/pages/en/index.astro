@@ -1,0 +1,190 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/sections/Hero.astro";
+import Features from "../../components/sections/Features.astro";
+import CTA from "../../components/sections/CTA.astro";
+import FAQ from "../../components/sections/FAQ.astro";
+import Testimonials from "../../components/sections/Testimonials.astro";
+import ProductCard from "../../components/cards/ProductCard.astro";
+import Container from "../../components/ui/Container.astro";
+import SectionTitle from "../../components/ui/SectionTitle.astro";
+
+import { getCollection } from "astro:content";
+import { fetchCases, sanityAvailable } from "../../lib/sanity/api";
+import { normalizeSanityLocale } from "../../lib/sanity/env";
+import { resolveImageUrl } from "../../lib/content/images";
+import { pickLocale } from "../../lib/i18n/content";
+import { localizePath } from "../../lib/i18n/routing";
+
+export const prerender = true;
+
+const lang = "en";
+const locale = normalizeSanityLocale(lang);
+const useSanity = sanityAvailable();
+
+let featuredCases = [] as Array<{
+  slug: string;
+  title: string;
+  description: string;
+  isFeatured?: boolean;
+  publishDate: string;
+  coverImage: string;
+  coverImageMeta?: { alt?: string };
+}>;
+
+if (useSanity) {
+  const sanityCases = await fetchCases(locale);
+  featuredCases = sanityCases.length
+    ? sanityCases.filter((c) => c.isFeatured === true)
+    : pickLocale(await getCollection("cases"), lang)
+        .filter((entry) => entry.data.isFeatured === true)
+        .map((entry) => ({
+          slug: entry.id,
+          title: entry.data.title,
+          description: entry.data.description,
+          isFeatured: entry.data.isFeatured,
+          publishDate: entry.data.publishDate.toISOString().slice(0, 10),
+          coverImage: resolveImageUrl(entry.data.coverImage) ?? entry.data.coverImage,
+          coverImageMeta: entry.data.coverImageMeta,
+        }));
+} else {
+  featuredCases = pickLocale(await getCollection("cases"), lang)
+    .filter((entry) => entry.data.isFeatured === true)
+    .map((entry) => ({
+      slug: entry.id,
+      title: entry.data.title,
+      description: entry.data.description,
+      isFeatured: entry.data.isFeatured,
+      publishDate: entry.data.publishDate.toISOString().slice(0, 10),
+      coverImage: resolveImageUrl(entry.data.coverImage) ?? entry.data.coverImage,
+      coverImageMeta: entry.data.coverImageMeta,
+    }));
+}
+
+const heroImage = "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1200&q=80";
+---
+
+<BaseLayout
+  title="Space Art | Minimal Architecture Studio"
+  description="We explore the essence of living through restrained spatial design. Residential, commercial, and cultural projects."
+  image={heroImage}
+  locale={lang}
+>
+  <Fragment slot="head">
+    <link rel="preload" as="image" href={heroImage} imagesizes="100vw" fetchpriority="high" />
+  </Fragment>
+
+  <Hero
+    title="Reshaping order and beauty in space"
+    subtitle="Architecture is a vessel for life. We build timeless spaces with a restrained design language."
+    image={heroImage}
+    badgeText="Architecture & Design Studio"
+    primaryCtaText="Book a consultation"
+    primaryCtaHref={localizePath("/contact", lang)}
+    secondaryCtaText="View projects"
+    secondaryCtaHref={localizePath("/products", lang)}
+  />
+
+  <Container className="grid grid-cols-2 md:grid-cols-4 gap-12 py-20 border-y border-border-soft mb-20">
+    <div class="text-center">
+      <p class="text-3xl font-serif text-text-primary mb-2">15+</p>
+      <p class="text-text-secondary text-xs uppercase tracking-widest">Years</p>
+    </div>
+    <div class="text-center">
+      <p class="text-3xl font-serif text-text-primary mb-2">300+</p>
+      <p class="text-text-secondary text-xs uppercase tracking-widest">Projects</p>
+    </div>
+    <div class="text-center">
+      <p class="text-3xl font-serif text-text-primary mb-2">30+</p>
+      <p class="text-text-secondary text-xs uppercase tracking-widest">Awards</p>
+    </div>
+    <div class="text-center">
+      <p class="text-3xl font-serif text-text-primary mb-2">100%</p>
+      <p class="text-text-secondary text-xs uppercase tracking-widest">Original</p>
+    </div>
+  </Container>
+
+  <Container className="mb-24">
+    <SectionTitle title="Featured Projects" subtitle="Selected Works" align="left" as="h1" className="mb-16" />
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+      {featuredCases.map((caseItem) => (
+        <ProductCard product={caseItem} slug={caseItem.slug} />
+      ))}
+    </div>
+  </Container>
+
+  <Features
+    title="How we define space"
+    subtitle="Principles"
+    intro="Each project starts with a deep conversation about lifestyle. We pursue timeless value instead of trends."
+    features={[
+      {
+        title: "Minimalist philosophy",
+        description: "Remove the redundant and return to the essence. Pure geometry shapes calm and restorative environments.",
+      },
+      {
+        title: "Light as narrative",
+        description: "Architecture organizes light. We study daylight movement to give spaces a living rhythm.",
+      },
+      {
+        title: "Sustainable making",
+        description: "Natural materials and modern green building strategies ensure long-term durability and comfort.",
+      },
+    ]}
+  />
+
+  <Testimonials
+    title="Client Stories"
+    subtitle="Testimonials"
+    testimonials={[
+      {
+        quote:
+          "Beyond aesthetics, their precise control of light and airflow turned my home into a true sanctuary.",
+        author: "Mr. Zhang",
+        role: "Private Villa Owner",
+      },
+      {
+        quote:
+          "They balanced the rawness of industrial heritage with refined modern office needs — beyond our expectations.",
+        author: "Ms. Li",
+        role: "Creative Park Director",
+      },
+      {
+        quote:
+          "Minimal yet never simplistic. The craftsmanship and detailing are nearly flawless — rare in the industry.",
+        author: "Mr. Wang",
+        role: "Boutique Hotel Founder",
+      },
+    ]}
+  />
+
+  <FAQ
+    title="Frequently Asked Questions"
+    subtitle="Process"
+    intro="If you have specific questions, book a 1:1 call with our design consultant."
+    faqs={[
+      {
+        question: "How long does the design process take?",
+        answer:
+          "Concept and schematic design typically take 4–8 weeks, depending on scale and complexity. We design deliberately to ensure every detail holds up.",
+      },
+      {
+        question: "Do you provide site supervision?",
+        answer:
+          "Yes. We offer full-cycle design supervision with regular site visits to ensure the build follows design intent and material standards.",
+      },
+      {
+        question: "How do we plan a reasonable budget?",
+        answer:
+          "During the initial consultation, we provide an informed estimate based on your goals. We aim to maximize spatial value within budget constraints.",
+      },
+    ]}
+  />
+
+  <CTA
+    title="Ready to start your project?"
+    description="From private residences to commercial spaces, we’re ready to bring a distinctive architectural perspective."
+    buttonText="Book a consultation"
+    buttonLink={localizePath("/contact", lang)}
+  />
+</BaseLayout>

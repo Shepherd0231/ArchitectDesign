@@ -1,0 +1,97 @@
+---
+import Container from "./ui/Container.astro";
+import { fallbackSiteSettings } from "../consts";
+import { getLocaleFromPathname, localizePath } from "../lib/i18n/routing";
+import { t } from "../lib/i18n/messages";
+
+interface Props {
+  settings?: {
+    title?: string;
+    email?: string;
+    phone?: string;
+    whatsapp?: string;
+    wechat?: string;
+    social?: Record<string, string | undefined>;
+  };
+  whatsappHref?: string;
+}
+
+const { settings = fallbackSiteSettings, whatsappHref } = Astro.props;
+const locale = getLocaleFromPathname(Astro.url.pathname);
+const addressLines = t(locale, 'footer', 'address').split('\n');
+---
+
+<footer class="bg-primary-brand text-white py-24">
+    <Container>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-16">
+            <div class="md:col-span-5">
+                <a href={localizePath('/', locale)} class="text-2xl font-heading tracking-[0.2em] mb-8 block no-underline text-white uppercase">
+                    Astro<span class="text-accent-gold">Meta</span>
+                </a>
+                <p class="text-white/50 text-sm max-w-sm leading-relaxed mb-10">
+                    {t(locale, 'footer', 'description')}
+                </p>
+                <div class="flex gap-6">
+                    {settings.social?.instagram && (
+                        <a href={settings.social.instagram} target="_blank" rel="noreferrer" class="text-white/40 hover:text-accent-gold transition-colors">Instagram</a>
+                    )}
+                    {settings.social?.behance && (
+                        <a href={settings.social.behance} target="_blank" rel="noreferrer" class="text-white/40 hover:text-accent-gold transition-colors">Behance</a>
+                    )}
+                    {settings.social?.pinterest && (
+                        <a href={settings.social.pinterest} target="_blank" rel="noreferrer" class="text-white/40 hover:text-accent-gold transition-colors">Pinterest</a>
+                    )}
+                </div>
+            </div>
+            
+            <div class="md:col-span-3">
+                <h4 class="text-[10px] uppercase tracking-[0.3em] font-bold mb-8 text-accent-gold">{t(locale, 'footer', 'quickLinks')}</h4>
+                <ul class="space-y-4 list-none p-0">
+                    <li><a href={localizePath("/products", locale)} class="text-white/60 hover:text-white no-underline text-xs tracking-widest transition-colors uppercase">{t(locale, 'nav', 'products')}</a></li>
+                    <li><a href={localizePath("/catalog", locale)} class="text-white/60 hover:text-white no-underline text-xs tracking-widest transition-colors uppercase">{t(locale, 'nav', 'catalog')}</a></li>
+                    <li><a href={localizePath("/about", locale)} class="text-white/60 hover:text-white no-underline text-xs tracking-widest transition-colors uppercase">{t(locale, 'nav', 'about')}</a></li>
+                    <li><a href={localizePath("/blog", locale)} class="text-white/60 hover:text-white no-underline text-xs tracking-widest transition-colors uppercase">{t(locale, 'nav', 'blog')}</a></li>
+                    <li><a href={localizePath("/contact", locale)} class="text-white/60 hover:text-white no-underline text-xs tracking-widest transition-colors uppercase">{t(locale, 'nav', 'contact')}</a></li>
+                </ul>
+            </div>
+            
+            <div class="md:col-span-4">
+                <h4 class="text-[10px] uppercase tracking-[0.3em] font-bold mb-8 text-accent-gold">{t(locale, 'footer', 'contact')}</h4>
+                <p class="text-white/60 text-xs tracking-widest leading-relaxed mb-4">
+                    {addressLines.map((line, idx) => (
+                      <>
+                        {line}
+                        {idx === addressLines.length - 1 ? null : <br />}
+                      </>
+                    ))}
+                </p>
+                <p class="text-white/60 text-xs tracking-widest">
+                    {settings.phone && (
+                        <span>
+                            T: <a href={`tel:${settings.phone.replace(/\s+/g, '')}`} class="text-white/60 hover:text-white no-underline transition-colors">{settings.phone}</a><br />
+                        </span>
+                    )}
+                    {settings.email && (
+                        <span>
+                            E: <a href={`mailto:${settings.email}`} class="text-white/60 hover:text-white no-underline transition-colors">{settings.email}</a>
+                        </span>
+                    )}
+                    {whatsappHref && (
+                        <span>
+                            <br />W: <a href={whatsappHref} target="_blank" rel="noreferrer" class="text-white/60 hover:text-white no-underline transition-colors">WhatsApp</a>
+                        </span>
+                    )}
+                </p>
+            </div>
+        </div>
+        
+        <div class="mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p class="text-white/30 text-[10px] uppercase tracking-widest">
+                &copy; {new Date().getFullYear()} AstroMeta Design Studio. All Rights Reserved.
+            </p>
+            <p class="text-white/30 text-[10px] uppercase tracking-widest">
+                {t(locale, 'footer', 'filing')}
+            </p>
+        </div>
+    </Container>
+</footer>

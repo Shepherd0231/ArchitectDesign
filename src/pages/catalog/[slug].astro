@@ -1,0 +1,61 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/ui/Container.astro";
+import ResponsivePicture from "../../components/ui/ResponsivePicture.astro";
+
+import products from "../../data/products.json";
+import { resolveImageUrl } from "../../lib/content/images";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const list = products as Array<{ slug?: unknown }>;
+  return list
+    .filter((p) => typeof p.slug === 'string' && p.slug.length > 0)
+    .map((p) => ({ params: { slug: p.slug as string } }));
+}
+
+const slug = Astro.params.slug as string;
+const list = products as Array<{
+  slug: string;
+  title: string;
+  description: string;
+  image?: string;
+  price?: string;
+}>;
+
+const product = list.find((p) => p.slug === slug);
+if (!product) throw new Error("Product not found");
+
+const image = resolveImageUrl(product.image);
+---
+
+<BaseLayout title={`${product.title} | 产品目录`} description={product.description} image={image}>
+  <Container className="py-24 lg:py-32">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+      <div class="lg:col-span-6">
+        <div class="aspect-[4/5] overflow-hidden bg-gray-100">
+          <ResponsivePicture
+            src={image ?? ""}
+            alt={product.title}
+            width={960}
+            height={1200}
+            priority={true}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+      <div class="lg:col-span-6">
+        <h1 class="text-4xl md:text-6xl font-heading leading-tight mb-8">{product.title}</h1>
+        <p class="text-text-secondary text-lg leading-relaxed mb-10">{product.description}</p>
+        {product.price ? (
+          <p class="text-[10px] uppercase tracking-widest font-bold text-accent-gold mb-10">
+            {product.price}
+          </p>
+        ) : null}
+        <a href="/contact/" class="btn-primary">获取报价 / 联系我们</a>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

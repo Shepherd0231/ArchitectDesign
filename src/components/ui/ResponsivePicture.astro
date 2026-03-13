@@ -1,0 +1,192 @@
+---
+interface Props {
+  src?: unknown;
+  alt: string;
+  className?: string;
+  sizes?: string;
+  widths?: number[];
+  priority?: boolean;
+  width?: number;
+  height?: number;
+}
+
+const {
+  src: rawSrc,
+  alt,
+  className = '',
+  sizes = '100vw',
+  widths = [480, 800, 1200, 1920],
+  priority = false,
+  width,
+  height,
+} = Astro.props;
+
+const src = typeof rawSrc === 'string' ? rawSrc : '';
+
+const r2PublicUrl = import.meta.env.R2_PUBLIC_URL as string | undefined;
+const r2Prefix = (import.meta.env.R2_PREFIX as string | undefined)?.replace(/^\/+|\/+$/g, '');
+const mediaWebp = (import.meta.env.PUBLIC_MEDIA_WEBP as string | undefined) !== 'false';
+
+function isHttpUrl(value: string) {
+  return /^https?:\/\//i.test(value);
+}
+
+function normalizeUrl(base: string, path: string) {
+  if (!base) return path;
+  const b = base.replace(/\/+$/g, '');
+  const p = path.replace(/^\/+/g, '');
+  return `${b}/${p}`;
+}
+
+function stripSizeSuffix(filename: string) {
+  return filename.replace(/-\d{2,5}(\.[a-z0-9]+)$/i, '$1');
+}
+
+function hasSizeSuffix(input: string) {
+  const withoutQuery = input.split('?')[0];
+  const file = withoutQuery.split('/').pop() ?? withoutQuery;
+  return /-\d{2,5}\.[a-z0-9]+$/i.test(file);
+}
+
+const srcResolved = (() => {
+  if (src.startsWith('r2://')) {
+    if (!r2PublicUrl) return '';
+    const path = src.slice('r2://'.length).replace(/^\/+/g, '');
+    return `${r2PublicUrl.replace(/\/+$/g, '')}/${path}`;
+  }
+  return src;
+})();
+
+function buildR2Candidates(input: string) {
+  const withoutQuery = input.split('?')[0];
+  const file = withoutQuery.split('/').pop() ?? withoutQuery;
+  const hasExt = /\.[a-z0-9]+$/i.test(file);
+  const ext = hasExt ? file.slice(file.lastIndexOf('.')) : '.jpg';
+  const fileNoExt = hasExt ? file.slice(0, file.lastIndexOf('.')) : file;
+  const normalized = stripSizeSuffix(`${fileNoExt}${ext}`);
+  const base = normalized.slice(0, normalized.lastIndexOf('.'));
+
+  let baseKey = base;
+  if (isHttpUrl(input) && r2PublicUrl) {
+    const origin = new URL(r2PublicUrl).origin;
+    if (input.startsWith(origin)) {
+      const p = new URL(input).pathname.replace(/^\/+/, '');
+      baseKey = stripSizeSuffix(p).replace(/\.[a-z0-9]+$/i, '');
+    }
+  } else if (r2Prefix) {
+    baseKey = `${r2Prefix}/${base}`;
+  }
+
+  const candidates = widths.map((w) => {
+    const key = `${baseKey}-${w}${ext}`;
+    return { w, url: normalizeUrl(r2PublicUrl ?? '', key) };
+  });
+
+  return { candidates };
+}
+
+function buildUnsplashSrcset(input: string) {
+  const u = new URL(input);
+  u.searchParams.set('auto', 'format');
+  u.searchParams.set('fit', 'crop');
+  u.searchParams.set('q', u.searchParams.get('q') ?? '80');
+  const srcset = widths
+    .map((w) => {
+      const x = new URL(u.toString());
+      x.searchParams.set('w', String(w));
+      return `${x.toString()} ${w}w`;
+    })
+    .join(', ');
+  const defaultUrl = new URL(u.toString());
+  defaultUrl.searchParams.set('w', String(widths[1] ?? 800));
+  return { srcset, url: defaultUrl.toString() };
+}
+
+const isUnsplash = (() => {
+  try {
+    const u = new URL(srcResolved);
+    return u.hostname.includes('unsplash.com');
+  } catch {
+    return false;
+  }
+})();
+
+const isLocalPath = srcResolved.startsWith('/') && !srcResolved.startsWith('//');
+const isR2Url =
+  !!r2PublicUrl &&
+  isHttpUrl(srcResolved) &&
+  srcResolved.startsWith(new URL(r2PublicUrl).origin);
+const canUseR2Srcset = (src.startsWith('r2://') || isR2Url) && hasSizeSuffix(srcResolved);
+const useR2 = !!r2PublicUrl && !isUnsplash && !isLocalPath && canUseR2Srcset;
+
+const loading = priority ? 'eager' : 'lazy';
+const fetchpriority = priority ? 'high' : 'auto';
+const fallbackSrc = srcResolved || '/images/placeholder.svg';
+---
+
+{!fallbackSrc || fallbackSrc === '/images/placeholder.svg' ? (
+  <img
+    src="/images/placeholder.svg"
+    alt={alt}
+    class={className}
+    width={width}
+    height={height}
+    loading={loading}
+    decoding="async"
+    fetchpriority={fetchpriority}
+  />
+) : isUnsplash ? (
+  (() => {
+    const { srcset, url } = buildUnsplashSrcset(fallbackSrc);
+    return (
+      <img
+        src={url}
+        srcset={srcset}
+        sizes={sizes}
+        alt={alt}
+        class={className}
+        width={width}
+        height={height}
+        loading={loading}
+        decoding="async"
+        fetchpriority={fetchpriority}
+      />
+    );
+  })()
+) : useR2 ? (
+  (() => {
+    const { candidates } = buildR2Candidates(fallbackSrc);
+    const srcset = candidates.map((c) => `${c.url} ${c.w}w`).join(', ');
+    const webpSrcset = candidates
+      .map((c) => `${c.url.replace(/\.[a-z0-9]+$/i, '.webp')} ${c.w}w`)
+      .join(', ');
+    const fallback = candidates[0]?.url ?? fallbackSrc;
+    return (
+      <picture>
+        {mediaWebp ? <source type="image/webp" srcset={webpSrcset} sizes={sizes} /> : null}
+        <source srcset={srcset} sizes={sizes} />
+        <img
+          src={fallback}
+          alt={alt}
+          class={className}
+          width={width}
+          height={height}
+          loading={loading}
+          decoding="async"
+          fetchpriority={fetchpriority}
+        />
+      </picture>
+    );
+  })()
+) : (
+  <img
+    src={fallbackSrc}
+    alt={alt}
+    class={className}
+    width={width}
+    height={height}
+    loading={loading}
+    decoding="async"
+    fetchpriority={fetchpriority}
+  />
+)}

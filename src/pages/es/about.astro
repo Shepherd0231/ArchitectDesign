@@ -1,0 +1,62 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "../../components/ui/Container.astro";
+import SectionTitle from "../../components/ui/SectionTitle.astro";
+import ResponsivePicture from "../../components/ui/ResponsivePicture.astro";
+
+export const prerender = true;
+
+const lang = "es";
+const aboutImage = "https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&w=1200&q=80";
+---
+
+<BaseLayout
+  title="Nosotros | AstroMeta"
+  description="Conoce nuestra filosofía de diseño, el equipo y cómo creamos espacios que perduran."
+  image={aboutImage}
+  locale={lang}
+>
+  <Container className="py-24 lg:py-32">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+      <div class="lg:col-span-6">
+        <SectionTitle title="Puro. Sereno. Atemporal." subtitle="Nuestra Historia" align="left" as="h1" />
+        <div class="mt-12 space-y-6 text-text-secondary leading-relaxed">
+          <p>
+            Fundado en 2015, AstroMeta es un estudio boutique de arquitectura con base en Shanghái. Creemos que la
+            arquitectura es más que construcción: es un contenedor de luz, material y emoción.
+          </p>
+          <p>
+            Durante la última década, evitamos tendencias pasajeras y seguimos una lógica de diseño de adentro hacia
+            afuera. Desde viviendas privadas hasta espacios comerciales, buscamos el orden espacial adecuado para cada
+            proyecto y entregamos obras serenas, duraderas y con calidez humana.
+          </p>
+        </div>
+
+        <div class="mt-16 grid grid-cols-2 gap-12 border-t border-border-soft pt-12">
+          <div>
+            <h4 class="text-[10px] uppercase tracking-widest font-bold mb-4 text-accent-gold">Valores</h4>
+            <p class="text-sm">Minimal, Puro, Atemporal, Natural</p>
+          </div>
+          <div>
+            <h4 class="text-[10px] uppercase tracking-widest font-bold mb-4 text-accent-gold">Servicios</h4>
+            <p class="text-sm">Arquitectura, Interiorismo, Paisajismo</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-6">
+        <div class="aspect-[4/5] bg-gray-100 relative overflow-hidden">
+          <ResponsivePicture
+            src={aboutImage}
+            alt="Studio Space"
+            width={960}
+            height={1200}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className="w-full h-full object-cover grayscale"
+          />
+        </div>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>
+

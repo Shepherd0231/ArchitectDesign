@@ -1,4 +1,3 @@
-好的，我根据你的《Astro 外贸独立站标准架构蓝图 v2.0》，优化生成了第二个 `astro-deployment` Skill，专注于 Cloudflare Pages + R2 + Serverless 表单 + 安全 headers + 缓存 + 环境变量，确保低运维、高性能、多页、多语言兼容。
 
 ---
 

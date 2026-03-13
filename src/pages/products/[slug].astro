@@ -1,0 +1,151 @@
+---
+import { toHTML } from '@portabletext/to-html';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/ui/Container.astro';
+import ResponsivePicture from '../../components/ui/ResponsivePicture.astro';
+import { getCollection, getEntry, render } from 'astro:content';
+import { fetchCaseBySlug, fetchCases, sanityAvailable } from '../../lib/sanity/api';
+import { normalizeSanityLocale } from '../../lib/sanity/env';
+import { resolveImageUrl } from '../../lib/content/images';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  if (sanityAvailable()) {
+    const cases = await fetchCases('zh');
+    if (cases.length) {
+      return cases
+        .filter((caseItem) => typeof caseItem.slug === 'string' && caseItem.slug.length > 0)
+        .map((caseItem) => ({ params: { slug: caseItem.slug } }));
+    }
+  }
+
+  const entries = await getCollection('cases');
+  return entries
+    .filter((entry) => typeof entry.id === 'string' && entry.id.length > 0)
+    .map((entry) => ({ params: { slug: entry.id } }));
+}
+
+const locale = normalizeSanityLocale((Astro as any).currentLocale);
+const slug = Astro.params.slug as string;
+const useSanity = sanityAvailable();
+
+let title = '';
+let description = '';
+let coverImage = '';
+let client: string | undefined;
+let location: string | undefined;
+let year: number | undefined;
+let tags: string[] | undefined;
+let bodyHtml = '';
+let Content: any;
+let keywords: string[] | string | undefined;
+let canonical: string | undefined;
+let noindex: boolean | undefined;
+
+if (useSanity) {
+  const caseItem = await fetchCaseBySlug(locale, slug);
+  if (!caseItem) {
+    const entry = await getEntry('cases', slug);
+    if (!entry) throw new Error('Case not found');
+
+    title = entry.data.title;
+    description = entry.data.description;
+    coverImage = resolveImageUrl(entry.data.coverImage) ?? entry.data.coverImage;
+    client = entry.data.client;
+    location = entry.data.location;
+    year = entry.data.year;
+    tags = entry.data.tags;
+    const rendered = await render(entry);
+    Content = rendered.Content;
+    keywords = entry.data.seo?.keywords ?? tags;
+    canonical = entry.data.seo?.canonical;
+    noindex = entry.data.seo?.noindex;
+  } else {
+    title = caseItem.title;
+    description = caseItem.description;
+    coverImage = caseItem.coverImage;
+    client = caseItem.client;
+    location = caseItem.location;
+    year = caseItem.year;
+    tags = caseItem.tags;
+    bodyHtml = toHTML((caseItem as any).body ?? []);
+    keywords = tags;
+  }
+} else {
+  const entry = await getEntry('cases', slug);
+  if (!entry) throw new Error('Case not found');
+
+  title = entry.data.title;
+  description = entry.data.description;
+  coverImage = resolveImageUrl(entry.data.coverImage) ?? entry.data.coverImage;
+  client = entry.data.client;
+  location = entry.data.location;
+  year = entry.data.year;
+  tags = entry.data.tags;
+  const rendered = await render(entry);
+  Content = rendered.Content;
+  keywords = entry.data.seo?.keywords ?? tags;
+  canonical = entry.data.seo?.canonical;
+  noindex = entry.data.seo?.noindex;
+}
+---
+<BaseLayout
+  title={`${title} | 设计案例`}
+  description={description}
+  image={coverImage}
+  keywords={keywords}
+  canonical={canonical}
+  noindex={noindex}
+>
+    <div class="relative h-[60vh] bg-zinc-900">
+        <ResponsivePicture
+            src={coverImage}
+            alt={title}
+            priority={true}
+            width={1920}
+            height={1080}
+            sizes="100vw"
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        <Container className="relative h-full flex flex-col justify-end pb-24">
+            <h1 class="text-white text-4xl md:text-7xl font-heading max-w-4xl">{title}</h1>
+        </Container>
+    </div>
+
+    <Container className="py-24">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+            <div class="lg:col-span-8">
+                <div class="prose prose-lg max-w-none prose-headings:font-heading prose-p:text-text-secondary prose-a:text-accent-gold">
+                    {useSanity ? <div set:html={bodyHtml} /> : Content ? <Content /> : null}
+                </div>
+            </div>
+            <div class="lg:col-span-4">
+                <div class="sticky top-24 bg-white border border-border-soft p-8">
+                    <h3 class="text-[10px] uppercase tracking-[0.3em] font-bold mb-6 text-accent-gold border-b border-border-soft pb-3">项目信息</h3>
+                    <dl class="space-y-6">
+                        <div class="flex flex-col gap-1">
+                            <dt class="text-[10px] uppercase tracking-widest text-text-secondary">客户</dt>
+                            <dd class="font-semibold">{client || '保密'}</dd>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <dt class="text-[10px] uppercase tracking-widest text-text-secondary">地点</dt>
+                            <dd class="font-semibold">{location || '未知'}</dd>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <dt class="text-[10px] uppercase tracking-widest text-text-secondary">年份</dt>
+                            <dd class="font-semibold">{year || '-'}</dd>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <dt class="text-[10px] uppercase tracking-widest text-text-secondary">标签</dt>
+                            <dd class="flex flex-wrap gap-2">
+                                {tags?.map(tag => <span class="bg-light-bg text-text-secondary text-xs px-2 py-1">{tag}</span>)}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </Container>
+</BaseLayout>

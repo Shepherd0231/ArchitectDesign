@@ -1,0 +1,71 @@
+---
+import Container from "../ui/Container.astro";
+import SectionTitle from "../ui/SectionTitle.astro";
+
+interface Testimonial {
+  quote: string;
+  author: string;
+  role: string;
+}
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  testimonials?: Testimonial[];
+}
+
+const defaultTestimonials: Testimonial[] = [
+  {
+    quote: "他们的设计不仅仅是美观，更重要的是对光影和空气流动的精准把握，让我的家变成了一个真正的庇护所。",
+    author: "张先生",
+    role: "私人别墅业主"
+  },
+  {
+    quote: "在旧厂房改造项目中，他们完美地平衡了工业遗迹的粗犷与现代办公的精致，超出了我们的预期。",
+    author: "李女士",
+    role: "创意园区运营总监"
+  },
+  {
+    quote: "极简但不简单。每一个细节的收口都处理得近乎完美，这种对品质的追求在行业内非常罕见。",
+    author: "王先生",
+    role: "精品酒店主理人"
+  }
+];
+
+const {
+  title = "客户心声",
+  subtitle = "口碑评价",
+  testimonials = defaultTestimonials,
+} = Astro.props;
+---
+
+<section id="testimonials" class="py-24 bg-white border-y border-border-soft">
+    <Container>
+        <div class="flex flex-col items-center text-center max-w-4xl mx-auto mb-20">
+            <SectionTitle 
+                title={title} 
+                subtitle={subtitle} 
+                align="center"
+            />
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
+            {testimonials.map(testimonial => (
+                <div class="flex flex-col">
+                    <div class="mb-8 text-accent-gold">
+                        <svg class="w-10 h-10 opacity-40" fill="currentColor" viewBox="0 0 32 32">
+                            <path d="M10 8v8H6v8h8V8h-4zm12 0v8h-4v8h8V8h-4z" />
+                        </svg>
+                    </div>
+                    <blockquote class="text-lg mb-10 italic leading-relaxed text-text-primary font-serif">
+                        "{testimonial.quote}"
+                    </blockquote>
+                    <div class="mt-auto pt-8 border-t border-border-soft">
+                        <p class="font-bold uppercase tracking-widest text-xs mb-1">{testimonial.author}</p>
+                        <p class="text-text-secondary text-[10px] uppercase tracking-wider">{testimonial.role}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </Container>
+</section>

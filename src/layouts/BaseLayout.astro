@@ -1,0 +1,121 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import FloatingWidget from "../components/ui/FloatingWidget.astro";
+import SEOHead from "../components/SEOHead.astro";
+import '../styles/global.css';
+import { fetchSiteSettings, sanityAvailable } from '../lib/sanity/api';
+import { fallbackSiteSettings } from '../consts';
+import { buildAlternates, defaultLocale, getLocaleFromPathname, localizePath, ogLocale } from "../lib/i18n/routing";
+import { t } from "../lib/i18n/messages";
+
+const { title, description, image, keywords, canonical, noindex, locale: pageLocale } = Astro.props;
+
+const r2PublicUrl = import.meta.env.R2_PUBLIC_URL as string | undefined;
+const r2Origin = r2PublicUrl ? new URL(r2PublicUrl).origin : undefined;
+
+const currentLocale = (pageLocale as string | undefined) ?? getLocaleFromPathname(Astro.url.pathname);
+
+const settings = sanityAvailable()
+  ? (await fetchSiteSettings()) ?? fallbackSiteSettings
+  : fallbackSiteSettings;
+
+const whatsappHref = settings.whatsapp
+  ? (settings.whatsapp.startsWith('http')
+      ? settings.whatsapp
+      : `https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`)
+  : undefined;
+
+type FloatingChannel = {
+  type: 'email' | 'whatsapp' | 'wechat' | 'phone' | 'instagram' | 'facebook' | 'xhs';
+  label: string;
+  value: string;
+  href?: string;
+};
+
+const channels: FloatingChannel[] = [];
+
+if (settings.email) channels.push({ type: 'email', label: 'Email', value: settings.email, href: `mailto:${settings.email}` });
+if (settings.phone) channels.push({ type: 'phone', label: 'Phone', value: settings.phone, href: `tel:${settings.phone.replace(/\s+/g, '')}` });
+if (whatsappHref) channels.push({ type: 'whatsapp', label: 'WhatsApp', value: 'WhatsApp', href: whatsappHref });
+if (settings.wechat) channels.push({ type: 'wechat', label: 'WeChat', value: settings.wechat });
+if (settings.social?.instagram) channels.push({ type: 'instagram', label: 'Instagram', value: 'Instagram', href: settings.social.instagram });
+if (settings.social?.facebook) channels.push({ type: 'facebook', label: 'Facebook', value: 'Facebook', href: settings.social.facebook });
+if (settings.social?.xhs) channels.push({ type: 'xhs', label: 'Xiaohongshu', value: '小红书', href: settings.social.xhs });
+
+const sameAs = Object.values(settings.social ?? {}).filter(Boolean);
+const siteName = settings.title ?? "AstroMeta Design Studio";
+const siteUrl = (Astro.site ? Astro.site.toString() : '') || Astro.url.origin;
+const pageUrl = canonical ? new URL(canonical, siteUrl).toString() : new URL(Astro.url.pathname, siteUrl).toString();
+const alternates = buildAlternates(siteUrl, Astro.url.pathname);
+const xDefault = new URL(localizePath(Astro.url.pathname, defaultLocale), siteUrl).toString();
+const organization = {
+  "@type": "Organization",
+  name: siteName,
+  url: siteUrl,
+  contactPoint: [
+    settings.email
+      ? { "@type": "ContactPoint", contactType: "customer support", email: settings.email }
+      : null,
+    settings.phone
+      ? { "@type": "ContactPoint", contactType: "customer support", telephone: settings.phone }
+      : null,
+  ].filter(Boolean),
+  sameAs,
+};
+const website = {
+  "@type": "WebSite",
+  name: siteName,
+  url: siteUrl,
+  publisher: organization,
+  inLanguage: currentLocale,
+};
+const webpage = {
+  "@type": "WebPage",
+  name: title,
+  description,
+  url: pageUrl,
+  isPartOf: website,
+  inLanguage: currentLocale,
+};
+const structuredData = [organization, website, webpage];
+
+const preconnectHosts = [
+  r2Origin,
+  'https://images.unsplash.com',
+  'https://cdn.sanity.io',
+].filter(Boolean);
+---
+
+<html lang={currentLocale}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {preconnectHosts.map((href) => (
+      <link rel="preconnect" href={href} crossorigin />
+    ))}
+    <SEOHead
+      title={title}
+      description={description}
+      image={image}
+      keywords={keywords}
+      canonical={canonical}
+      noindex={noindex}
+      siteName={siteName}
+      locale={ogLocale(currentLocale as any)}
+      alternates={alternates}
+      xDefault={xDefault}
+      structuredData={structuredData}
+    />
+    <slot name="head" />
+</head>
+<body class="flex flex-col min-h-screen">
+    <a href="#main-content" class="skip-link">{t(currentLocale as any, 'a11y', 'skipToContent')}</a>
+    <Header />
+    <main id="main-content" tabindex="-1" class="flex-grow">
+        <slot />
+    </main>
+    <Footer settings={settings} whatsappHref={whatsappHref} />
+    <FloatingWidget title={t(currentLocale as any, 'floating', 'title')} channels={channels} />
+</body>
+</html>

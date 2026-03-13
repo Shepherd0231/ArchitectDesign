@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* 素雅色调：米白、炭灰、暖木、深金 */
+  --color-primary-brand: #2C2C2C; /* 炭灰色 - 主品牌色 */
+  --color-accent-gold: #B5A28C;  /* 柔和金/沙色 - 强调色 */
+  --color-dark-bg: #1A1A1A;
+  --color-light-bg: #F9F7F2;      /* 暖米白 - 背景色 */
+  --color-text-primary: #2C2C2C;
+  --color-text-secondary: #6B6B6B;
+  --color-border-soft: #E5E1D8;
+
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply font-body bg-light-bg text-text-primary m-0 antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-medium tracking-tight;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary-brand);
+    outline-offset: 3px;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    z-index: 1000;
+    transform: translateY(-200%);
+    background: var(--color-primary-brand);
+    color: #fff;
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-[85rem] mx-auto px-6 lg:px-12;
+  }
+
+  .section-padding {
+    @apply py-20 lg:py-32;
+  }
+
+  .btn-primary {
+    @apply px-8 py-4 bg-primary-brand text-white rounded-none hover:bg-black transition-all duration-500 inline-block text-center uppercase tracking-widest text-xs font-semibold;
+  }
+
+  .btn-secondary {
+    @apply px-8 py-4 border border-primary-brand text-primary-brand rounded-none hover:bg-primary-brand hover:text-white transition-all duration-500 inline-block text-center uppercase tracking-widest text-xs font-semibold;
+  }
+
+  .card {
+    @apply bg-white border border-border-soft p-8 shadow-none hover:border-accent-gold transition-colors duration-500;
+  }
+}

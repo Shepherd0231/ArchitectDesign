@@ -1,0 +1,56 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Container from "../../../components/ui/Container.astro";
+import SectionTitle from "../../../components/ui/SectionTitle.astro";
+import ResponsivePicture from "../../../components/ui/ResponsivePicture.astro";
+
+import products from "../../../data/products.json";
+import { resolveImageUrl } from "../../../lib/content/images";
+import { localizePath } from "../../../lib/i18n/routing";
+
+export const prerender = true;
+
+const lang = "es";
+
+const list = products as Array<{
+  slug: string;
+  title: string;
+  description: string;
+  image?: string;
+  price?: string;
+}>;
+
+const ogImage = resolveImageUrl(list[0]?.image);
+---
+
+<BaseLayout title="Catálogo | AstroMeta" description="Explora nuestro catálogo de productos y soluciones." image={ogImage} locale={lang}>
+  <Container className="py-24 lg:py-32">
+    <SectionTitle title="Catálogo" subtitle="Productos" align="left" as="h1" className="mb-16" />
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+      {list.map((item) => (
+        <a
+          href={localizePath(`/catalog/${item.slug}`, lang)}
+          class="group flex flex-col bg-white border border-border-soft overflow-hidden transition-all duration-700 hover:border-accent-gold no-underline"
+        >
+          <div class="relative block aspect-[3/4] overflow-hidden">
+            <ResponsivePicture
+              src={resolveImageUrl(item.image) ?? ""}
+              alt={item.title}
+              width={900}
+              height={1200}
+              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+              className="w-full h-full object-cover grayscale-[0.2] group-hover:scale-110 group-hover:grayscale-0 transition-all duration-1000"
+            />
+          </div>
+          <div class="p-8 flex flex-col flex-grow">
+            <h2 class="text-xl font-heading mb-4 group-hover:text-accent-gold transition-colors duration-500">{item.title}</h2>
+            <p class="text-text-secondary text-sm leading-relaxed mb-6 flex-grow">{item.description}</p>
+            {item.price ? <p class="text-xs uppercase tracking-widest font-bold text-accent-gold">{item.price}</p> : null}
+          </div>
+        </a>
+      ))}
+    </div>
+  </Container>
+</BaseLayout>
+

@@ -1,0 +1,26 @@
+---
+interface Props {
+  label: string;
+  href?: string;
+  type?: "primary" | "secondary" | "outline";
+  className?: string;
+  [key: string]: any;
+}
+
+const { label, href, type = "primary", className = "", ...rest } = Astro.props;
+
+const baseStyles = "px-8 py-4 rounded-full font-bold transition-all duration-300 inline-block text-center cursor-pointer no-underline";
+const typeStyles = {
+  primary: "bg-primary-red text-white hover:bg-[#CC0000] shadow-lg shadow-primary-red/20 hover:scale-105",
+  secondary: "bg-white text-text-primary hover:bg-gray-50 border border-gray-100 shadow-sm",
+  outline: "border-2 border-primary-red text-primary-red hover:bg-primary-red hover:text-white"
+};
+
+const finalClassName = `${baseStyles} ${typeStyles[type]} ${className}`;
+---
+
+{href ? (
+  <a href={href} class={finalClassName} {...rest}>{label}</a>
+) : (
+  <button class={finalClassName} {...rest}>{label}</button>
+)}

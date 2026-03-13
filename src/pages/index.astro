@@ -1,17 +1,137 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/sections/Hero.astro";
+import Features from "../components/sections/Features.astro";
+import CTA from "../components/sections/CTA.astro";
+import FAQ from "../components/sections/FAQ.astro";
+import Testimonials from "../components/sections/Testimonials.astro";
+import ProductCard from "../components/cards/ProductCard.astro";
+import Container from "../components/ui/Container.astro";
+import SectionTitle from "../components/ui/SectionTitle.astro";
 
+import { getCollection } from "astro:content";
+import { fetchCases, sanityAvailable } from '../lib/sanity/api';
+import { normalizeSanityLocale } from '../lib/sanity/env';
+import { resolveImageUrl } from "../lib/content/images";
+import { getLocaleFromPathname } from "../lib/i18n/routing";
+import { pickLocale } from "../lib/i18n/content";
+
+const lang = getLocaleFromPathname(Astro.url.pathname);
+const locale = normalizeSanityLocale(lang);
+const useSanity = sanityAvailable();
+let featuredCases = [] as Array<{
+  slug: string;
+  title: string;
+  description: string;
+  isFeatured?: boolean;
+  publishDate: string;
+  coverImage: string;
+  coverImageMeta?: { alt?: string };
+}>;
+
+if (useSanity) {
+  const sanityCases = await fetchCases(locale);
+  featuredCases = sanityCases.length
+    ? sanityCases.filter((c) => c.isFeatured === true)
+    : pickLocale(await getCollection('cases'), lang)
+        .filter((entry) => entry.data.isFeatured === true)
+        .map((entry) => ({
+          slug: entry.id,
+          title: entry.data.title,
+          description: entry.data.description,
+          isFeatured: entry.data.isFeatured,
+          publishDate: entry.data.publishDate.toISOString().slice(0, 10),
+          coverImage: resolveImageUrl(entry.data.coverImage) ?? entry.data.coverImage,
+          coverImageMeta: entry.data.coverImageMeta,
+        }));
+} else {
+  featuredCases = pickLocale(await getCollection('cases'), lang)
+    .filter((entry) => entry.data.isFeatured === true)
+    .map((entry) => ({
+      slug: entry.id,
+      title: entry.data.title,
+      description: entry.data.description,
+      isFeatured: entry.data.isFeatured,
+      publishDate: entry.data.publishDate.toISOString().slice(0, 10),
+      coverImage: resolveImageUrl(entry.data.coverImage) ?? entry.data.coverImage,
+      coverImageMeta: entry.data.coverImageMeta,
+    }));
+}
+
+export const prerender = true;
+
+const heroImage = "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1200&q=80";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="空间艺术 | 极简建筑设计事务所" description="我们致力于通过空间设计探索生活的本质。提供住宅、商业、文化空间的建筑规划与设计咨询。" image={heroImage}>
+    <Fragment slot="head">
+        <link rel="preload" as="image" href={heroImage} imagesizes="100vw" fetchpriority="high" />
+    </Fragment>
+    <!-- Hero Section -->
+    <Hero 
+        title="重塑空间的秩序与美感"
+        subtitle="我们相信建筑是生活的容器。通过克制的设计语言，为您构建超越时代的永恒空间。"
+        image={heroImage}
+        badgeText="建筑与空间设计事务所"
+    />
+
+    <!-- Stats Section -->
+    <Container className="grid grid-cols-2 md:grid-cols-4 gap-12 py-20 border-y border-border-soft mb-20">
+        <div class="text-center">
+            <p class="text-3xl font-serif text-text-primary mb-2">15+</p>
+            <p class="text-text-secondary text-xs uppercase tracking-widest">设计年限</p>
+        </div>
+        <div class="text-center">
+            <p class="text-3xl font-serif text-text-primary mb-2">300+</p>
+            <p class="text-text-secondary text-xs uppercase tracking-widest">落地案例</p>
+        </div>
+        <div class="text-center">
+            <p class="text-3xl font-serif text-text-primary mb-2">30+</p>
+            <p class="text-text-secondary text-xs uppercase tracking-widest">设计奖项</p>
+        </div>
+        <div class="text-center">
+            <p class="text-3xl font-serif text-text-primary mb-2">100%</p>
+            <p class="text-text-secondary text-xs uppercase tracking-widest">原创方案</p>
+        </div>
+    </Container>
+
+    <!-- Featured Products Section -->
+    <section class="py-20">
+        <Container>
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                <SectionTitle 
+                    title="代表作品选集" 
+                    subtitle="精品案例" 
+                    align="left" 
+                    className="mb-0"
+                />
+                <a href="/products/" class="text-primary-brand font-semibold flex items-center group no-underline pb-2 uppercase tracking-widest text-xs border-b border-transparent hover:border-primary-brand transition-all">
+                    查看全部案例
+                    <span class="ml-2 group-hover:translate-x-1 transition-transform">&rarr;</span>
+                </a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                {featuredCases.map(caseItem => (
+                    <ProductCard product={caseItem} slug={caseItem.slug} />
+                ))}
+            </div>
+        </Container>
+    </section>
+
+    <!-- Why Choose Us -->
+    <Features />
+
+    <!-- FAQ Section -->
+    <FAQ />
+
+    <!-- Testimonials Section -->
+    <Testimonials />
+
+    <!-- CTA Section -->
+    <CTA 
+        title="开启您的理想空间之旅" 
+        description="无论是私人府邸还是商业地标，我们都期待与您共同探索空间的无限可能。即刻联系我们获取初步方案建议。" 
+        buttonText="预约设计咨询" 
+        buttonLink="/contact/" 
+    />
+</BaseLayout>

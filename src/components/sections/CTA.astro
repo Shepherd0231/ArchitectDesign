@@ -1,0 +1,36 @@
+---
+import Container from "../ui/Container.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  buttonText?: string;
+  buttonLink?: string;
+}
+
+const { 
+  title = "准备好开启您的理想空间了吗？", 
+  description = "无论是私人住宅还是商业空间，我们都期待为您提供独特的建筑视角。", 
+  buttonText = "预约初步咨询", 
+  buttonLink = "/contact/" 
+} = Astro.props;
+---
+
+<section class="py-32 bg-primary-brand text-white overflow-hidden relative">
+    <!-- Decorative Circle -->
+    <div class="absolute -top-24 -right-24 w-96 h-96 border border-white/10 rounded-full"></div>
+    
+    <Container className="relative z-10">
+        <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
+            <h2 class="text-4xl md:text-6xl font-heading mb-8 leading-tight">
+                {title}
+            </h2>
+            <p class="text-white/70 text-lg md:text-xl mb-12 max-w-2xl leading-relaxed">
+                {description}
+            </p>
+            <a href={buttonLink} class="px-10 py-5 bg-white text-primary-brand hover:bg-accent-gold hover:text-white transition-all duration-500 uppercase tracking-widest text-xs font-bold">
+                {buttonText}
+            </a>
+        </div>
+    </Container>
+</section>

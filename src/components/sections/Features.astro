@@ -1,0 +1,69 @@
+---
+import Container from "../ui/Container.astro";
+import SectionTitle from "../ui/SectionTitle.astro";
+
+interface Feature {
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  intro?: string;
+  features?: Feature[];
+}
+
+const defaultFeatures: Feature[] = [
+  { 
+    title: "极简设计哲学", 
+    description: "剥离冗余，回归空间本真。我们通过纯粹的几何语言，创造能够安抚心灵的静谧环境。",
+    icon: "lucide:layers"
+  },
+  { 
+    title: "光影叙事能力", 
+    description: "建筑是捕捉光的容器。我们精研自然光在不同时段的流动，赋予空间动态的生命力。",
+    icon: "lucide:sun"
+  },
+  { 
+    title: "可持续性营造", 
+    description: "选用高质感天然材料，结合现代绿色建筑技术，确保设计作品能经受时间的洗礼与检验。",
+    icon: "lucide:leaf"
+  }
+];
+
+const {
+  title = "我们如何定义空间",
+  subtitle = "核心理念",
+  intro = "每一个设计方案都是一次对生活方式的深度访谈。我们不盲从流行，只追求空间的永恒价值与独特灵魂。",
+  features = defaultFeatures,
+} = Astro.props;
+---
+
+<section id="features" class="py-24 bg-white">
+    <Container>
+        <div class="max-w-3xl mb-20">
+            <SectionTitle 
+                title={title} 
+                subtitle={subtitle} 
+                align="left"
+            />
+            <p class="text-text-secondary text-lg leading-relaxed">
+                {intro}
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
+            {features.map(feature => (
+                <div class="group">
+                    <div class="w-12 h-px bg-accent-gold mb-8 group-hover:w-20 transition-all duration-500"></div>
+                    <h3 class="text-xl mb-4 font-heading">{feature.title}</h3>
+                    <p class="text-text-secondary leading-relaxed text-sm">
+                        {feature.description}
+                    </p>
+                </div>
+            ))}
+        </div>
+    </Container>
+</section>

@@ -1,0 +1,128 @@
+---
+import Container from "./ui/Container.astro";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import { getLocaleFromPathname, localizePath, stripLocalePrefix } from "../lib/i18n/routing";
+import { t } from "../lib/i18n/messages";
+
+const locale = getLocaleFromPathname(Astro.url.pathname);
+const pathname = stripLocalePrefix(Astro.url.pathname);
+
+const navLinks = [
+  { href: "/", label: t(locale, "nav", "home") },
+  { href: "/products", label: t(locale, "nav", "products") },
+  { href: "/catalog", label: t(locale, "nav", "catalog") },
+  { href: "/about", label: t(locale, "nav", "about") },
+  { href: "/blog", label: t(locale, "nav", "blog") },
+  { href: "/contact", label: t(locale, "nav", "contact") },
+];
+
+function isActiveBase(href: string) {
+  const h = href.replace(/\/+$/g, '') || '/';
+  const p = pathname.replace(/\/+$/g, '') || '/';
+  return h === '/' ? p === '/' : p.startsWith(h);
+}
+
+const homeHref = localizePath('/', locale);
+const mobileNavLabel = t(locale, 'nav', 'home');
+const openMenuLabel = t(locale, 'a11y', 'openMenu');
+const closeMenuLabel = t(locale, 'a11y', 'closeMenu');
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 bg-light-bg/80 backdrop-blur-md border-b border-border-soft">
+    <Container className="flex justify-between items-center py-6">
+        <a href={homeHref} class="text-2xl font-heading tracking-[0.2em] text-primary-brand no-underline uppercase">
+            Astro<span class="text-accent-gold">Meta</span>
+        </a>
+        
+        <nav class="hidden md:flex gap-10" aria-label="主导航">
+            {navLinks.map(link => (
+                <a 
+                    href={localizePath(link.href, locale)}
+                    aria-current={isActiveBase(link.href) ? "page" : undefined}
+                    class="text-[10px] uppercase tracking-[0.2em] font-semibold text-text-primary hover:text-accent-gold transition-colors no-underline"
+                >
+                    {link.label}
+                </a>
+            ))}
+        </nav>
+
+        <div class="hidden md:flex items-center gap-6">
+          <LanguageSwitcher />
+        </div>
+
+        <button
+          id="nav-toggle"
+          type="button"
+          class="md:hidden text-primary-brand"
+          aria-label={openMenuLabel}
+          aria-controls="mobile-nav"
+          aria-expanded="false"
+          data-open-label={openMenuLabel}
+          data-close-label={closeMenuLabel}
+        >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </Container>
+
+    <div id="mobile-nav" class="hidden md:hidden border-t border-border-soft bg-light-bg" role="dialog" aria-modal="true" aria-label={mobileNavLabel} tabindex="-1">
+        <Container className="py-6 flex flex-col gap-6">
+            <LanguageSwitcher />
+            {navLinks.map(link => (
+                <a
+                    href={localizePath(link.href, locale)}
+                    aria-current={isActiveBase(link.href) ? "page" : undefined}
+                    class="text-sm uppercase tracking-[0.2em] font-semibold text-text-primary hover:text-accent-gold transition-colors no-underline"
+                >
+                    {link.label}
+                </a>
+            ))}
+        </Container>
+    </div>
+</header>
+
+<script>
+  const btn = document.getElementById('nav-toggle');
+  const panel = document.getElementById('mobile-nav');
+
+  function isOpen() {
+    return panel && !panel.classList.contains('hidden');
+  }
+
+  function open() {
+    if (!panel || !btn) return;
+    panel.classList.remove('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+    btn.setAttribute('aria-label', btn.dataset.closeLabel || '');
+    panel.focus();
+  }
+
+  function close() {
+    if (!panel || !btn) return;
+    panel.classList.add('hidden');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-label', btn.dataset.openLabel || '');
+    btn.focus();
+  }
+
+  btn?.addEventListener('click', () => {
+    if (isOpen()) close();
+    else open();
+  });
+
+  panel?.addEventListener('click', (e) => {
+    const target = e.target;
+    if (target instanceof HTMLAnchorElement) close();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) close();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!isOpen() || !panel || !btn) return;
+    const t = e.target;
+    if (t instanceof Node && !panel.contains(t) && !btn.contains(t)) close();
+  });
+</script>

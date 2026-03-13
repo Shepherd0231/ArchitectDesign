@@ -1,0 +1,64 @@
+---
+import Container from "../ui/Container.astro";
+import SectionTitle from "../ui/SectionTitle.astro";
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  intro?: string;
+  faqs?: Array<{ question: string; answer: string }>;
+}
+
+const defaultFaqs = [
+  {
+    question: "设计周期通常需要多久？",
+    answer: "方案设计阶段通常需要4-8周，具体取决于项目的规模和复杂程度。我们坚持深思熟虑的设计，确保每一个细节都经得起推敲。"
+  },
+  {
+    question: "你们提供施工监理服务吗？",
+    answer: "是的，我们提供全周期的设计监理服务。我们会定期到访工地，确保施工团队严格遵循设计意图，并对材料选用提供专业指导。"
+  },
+  {
+    question: "如何确定我的项目预算是否合适？",
+    answer: "在初步咨询阶段，我们会根据您的需求提供专业的估算建议。我们的目标是在有限的预算内，通过巧妙的设计实现空间价值的最大化。"
+  }
+];
+
+const {
+  title = "常见问题解答",
+  subtitle = "咨询相关",
+  intro = "如果您有其他特定疑问，欢迎直接预约我们的设计顾问进行一对一深度交流。",
+  faqs = defaultFaqs,
+} = Astro.props;
+---
+
+<section id="faq" class="py-24 bg-light-bg">
+    <Container>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+            <div class="lg:col-span-4">
+                <SectionTitle 
+                    title={title} 
+                    subtitle={subtitle} 
+                    align="left"
+                />
+                <p class="text-text-secondary mt-8 leading-relaxed">
+                    {intro}
+                </p>
+            </div>
+            
+            <div class="lg:col-span-8 space-y-12">
+                {faqs.map(faq => (
+                    <div class="border-b border-border-soft pb-12 last:border-0 group">
+                        <h3 class="text-xl mb-6 font-heading flex items-start gap-4">
+                            <span class="text-accent-gold text-xs mt-2 uppercase tracking-tighter font-body">Q.</span>
+                            {faq.question}
+                        </h3>
+                        <p class="text-text-secondary leading-relaxed pl-8">
+                            {faq.answer}
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </Container>
+</section>

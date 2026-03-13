@@ -1,5 +1,5 @@
 
-# **Trae Skill: astro-content-management / sanity-content-management**
+# **Trae Skill:  sanity-content-management**
 
 **用途**：管理和维护网站内容，支持多内容类型（页面、Sections、产品、博客）、多语言、多版本和动态内容渲染。可与表单、图像、SEO、性能优化等 Skill 联动。
 
