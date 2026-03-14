@@ -18,7 +18,7 @@ interface Props {
 
 const { settings = fallbackSiteSettings, whatsappHref } = Astro.props;
 const locale = getLocaleFromPathname(Astro.url.pathname);
-const addressLines = t(locale, 'footer', 'address').split('\n');
+const addressLines = t(locale, 'footer', 'address').split('\n') as string[];
 ---
 
 <footer class="bg-primary-brand text-white py-24">
@@ -58,7 +58,7 @@ const addressLines = t(locale, 'footer', 'address').split('\n');
             <div class="md:col-span-4">
                 <h4 class="text-[10px] uppercase tracking-[0.3em] font-bold mb-8 text-accent-gold">{t(locale, 'footer', 'contact')}</h4>
                 <p class="text-white/60 text-xs tracking-widest leading-relaxed mb-4">
-                    {addressLines.map((line, idx) => (
+                    {addressLines.map((line: string, idx: number) => (
                       <>
                         {line}
                         {idx === addressLines.length - 1 ? null : <br />}

@@ -4,7 +4,7 @@ export const localizedString = {
   type: 'object',
   fields: [
     { name: 'en', title: 'English', type: 'string' },
+    { name: 'es', title: 'Spanish', type: 'string' },
     { name: 'zh', title: 'Chinese', type: 'string' },
   ],
 };
-

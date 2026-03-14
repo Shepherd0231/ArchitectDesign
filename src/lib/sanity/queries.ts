@@ -14,8 +14,8 @@ export const queries = {
       | order(publishDate desc)
       {
         "slug": slug.current,
-        "title": coalesce(title[$locale], title.en, title.zh),
-        "description": coalesce(description[$locale], description.en, description.zh),
+        "title": coalesce(title[$locale], title.en, title.es, title.zh),
+        "description": coalesce(description[$locale], description.en, description.es, description.zh),
         isFeatured,
         publishDate,
         "coverImage": coalesce(coverImageUrl, coverImage.asset->url),
@@ -25,8 +25,8 @@ export const queries = {
   caseBySlug: `
     *[_type == "case" && slug.current == $slug][0]{
       "slug": slug.current,
-      "title": coalesce(title[$locale], title.en, title.zh),
-      "description": coalesce(description[$locale], description.en, description.zh),
+      "title": coalesce(title[$locale], title.en, title.es, title.zh),
+      "description": coalesce(description[$locale], description.en, description.es, description.zh),
       isFeatured,
       publishDate,
       client,
@@ -43,8 +43,8 @@ export const queries = {
       | order(publishDate desc)
       {
         "slug": slug.current,
-        "title": coalesce(title[$locale], title.en, title.zh),
-        "description": coalesce(description[$locale], description.en, description.zh),
+        "title": coalesce(title[$locale], title.en, title.es, title.zh),
+        "description": coalesce(description[$locale], description.en, description.es, description.zh),
         publishDate,
         author,
         tags,
@@ -55,8 +55,8 @@ export const queries = {
   postBySlug: `
     *[_type == "post" && slug.current == $slug][0]{
       "slug": slug.current,
-      "title": coalesce(title[$locale], title.en, title.zh),
-      "description": coalesce(description[$locale], description.en, description.zh),
+      "title": coalesce(title[$locale], title.en, title.es, title.zh),
+      "description": coalesce(description[$locale], description.en, description.es, description.zh),
       publishDate,
       author,
       tags,
@@ -67,12 +67,12 @@ export const queries = {
   `,
   pageBySlug: `
     *[_type == "page" && slug.current == $slug][0]{
-      "title": coalesce(title[$locale], title.en, title.zh),
+      "title": coalesce(title[$locale], title.en, title.es, title.zh),
       "slug": slug.current,
       sections[]->{
         _id,
         layout,
-        "title": coalesce(title[$locale], title.en, title.zh),
+        "title": coalesce(title[$locale], title.en, title.es, title.zh),
         content,
         "imageUrl": coalesce(imageUrl, image.asset->url),
         imageMeta,

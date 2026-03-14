@@ -38,6 +38,17 @@
   - 运行迁移（本地开发示例）：`npm run d1:local`
 - 速率限制、防垃圾字段（`company` 蜜罐）、中英回复邮件均已内置
 
+#### 4.1) 表单邮件（Resend）最小可用配置
+表单接口依赖 Resend 发送通知邮件与可选自动回信。
+
+- `RESEND_TO`：管理员收件箱（可以用个人邮箱，例如 `shepherd.shen@gmail.com`）
+- `RESEND_FROM`：必须使用 Resend 允许的发件人地址（通常是你在 Resend 验证过的域名邮箱），不能随意填写 Gmail
+- `RESEND_API_KEY`：Resend API Key（建议在 Pages 里用“密钥”类型保存）
+
+建议在 Cloudflare Pages 的 Variables and secrets 里设置：
+- `RESEND_TO=shepherd.shen@gmail.com`
+- `RESEND_REPLY_ENABLED=true`
+
 ### 5) HTTP 缓存与 Headers
 - `public/_headers` 已设置：
   - `/assets/*`, `/images/*`, `/fonts/*`, `/*.css`, `/*.js` → `Cache-Control: public, max-age=31536000, immutable`
@@ -51,6 +62,28 @@
 - Pages Functions：默认路径 `functions/**`（已放置表单处理）
 - 路由控制：使用 `_routes.json` 仅启用 `/api/*` 的函数路由，减少冷启动和边缘执行成本
 - 绑定与变量：在 Pages 控制台配置 D1、环境变量、敏感密钥（不要提交到仓库）
+
+### 6.1) Sanity 发文后自动上线（推荐）
+目标：在 Sanity Studio 点击 Publish 后，自动触发 Cloudflare Pages 重新构建与发布。
+
+1) 在 Cloudflare Pages 创建 Deploy Hook
+- Pages 项目 → Settings → Builds & deployments → Deploy hooks
+- 新建一个 hook，复制得到的 URL（示例形如 `https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/...`）
+- 在 Pages 环境变量中设置：
+  - `CLOUDFLARE_DEPLOY_HOOK_URL`：Deploy Hook URL
+  - `SANITY_WEBHOOK_TOKEN`：自定义随机 token（用于鉴权）
+
+2) 在 Sanity Studio 创建 Webhook
+- Project → API → Webhooks → Create webhook
+- URL：`https://<你的域名>/api/webhooks/sanity`
+- Method：POST
+- Headers：添加 `Authorization: Bearer <SANITY_WEBHOOK_TOKEN>`
+- Trigger：勾选 document 发布相关事件（Create/Update/Publish）
+- 可选：为不同内容类型创建不同 webhook（例如只对 `post` 或 `case` 触发）
+
+3) 验证
+- Publish 一篇文章后，Cloudflare Pages 的 Deployments 会出现一次新的构建记录
+- 构建完成后 `/blog/` 会更新内容（Sanity 优先显示）
 
 ### 7) R2 建议
 - 建桶、绑定自定义域（HTTPS）
@@ -70,4 +103,3 @@
   - [ ] R2 图片直出或响应式 srcset正常，缺失图显示占位图
   - [ ] Headers 生效：静态资源长期缓存，HTML 可重新验证，API 不缓存
   - [ ] sitemap 包含所有语言 URL
-

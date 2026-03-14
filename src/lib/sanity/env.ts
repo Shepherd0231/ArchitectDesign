@@ -1,9 +1,10 @@
-export type SanityPublicLocale = 'en' | 'zh';
+export type SanityPublicLocale = 'en' | 'es' | 'zh';
 
 export function normalizeSanityLocale(locale: string | undefined): SanityPublicLocale {
   if (!locale) return 'zh';
   const lower = locale.toLowerCase();
   if (lower === 'en' || lower.startsWith('en-')) return 'en';
+  if (lower === 'es' || lower.startsWith('es-')) return 'es';
   return 'zh';
 }
 

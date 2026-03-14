@@ -87,12 +87,14 @@ export const onRequestPost = async (context: any) => {
   try {
     const recent = await env.FORMS_DB.prepare(
       `SELECT COUNT(1) AS count FROM submissions
-       WHERE ip = ? AND created_at > datetime('now','-10 minutes')`,
+       WHERE ip = ?
+         AND datetime(replace(replace(created_at,'T',' '),'Z','')) > datetime('now','-10 minutes')`,
     )
       .bind(ip)
-      .first<{ count: number }>();
+      .first();
+    const recentCount = Number((recent as any)?.count ?? 0);
 
-    if ((recent?.count ?? 0) >= 5) {
+    if (recentCount >= 5) {
       return json({ success: false, error: 'RATE_LIMITED', message: t.rateLimited }, { status: 429 });
     }
   } catch {
@@ -106,7 +108,7 @@ export const onRequestPost = async (context: any) => {
         source, page, locale,
         ip, user_agent,
         created_at
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?, datetime('now'))`,
     )
       .bind(
         'contact',
@@ -120,7 +122,6 @@ export const onRequestPost = async (context: any) => {
         locale || null,
         ip || null,
         userAgent || null,
-        createdAt,
       )
       .run();
   } catch {

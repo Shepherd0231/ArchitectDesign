@@ -13,6 +13,11 @@ export const section = {
     { name: 'image', type: 'image', title: 'Image', options: { hotspot: true } },
     { name: 'imageUrl', type: 'url', title: 'Image URL' },
     { name: 'imageMeta', type: 'imageMeta', title: 'Image Metadata' },
-    { name: 'data', type: 'object' },
+    {
+      name: 'data',
+      title: 'Data',
+      type: 'object',
+      fields: [{ name: 'json', title: 'JSON', type: 'text' }],
+    },
   ],
 };

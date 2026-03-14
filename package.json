@@ -15,6 +15,9 @@
     "images:generate": "node ./scripts/images/generate-responsive.mjs",
     "images:r2-upload": "node ./scripts/images/r2-upload.mjs",
     "images:unsplash": "node ./scripts/images/unsplash-random.mjs",
+    "sanity:dev": "node ./scripts/sanity/run.mjs dev --host 0.0.0.0 --port 3334",
+    "sanity:build": "node ./scripts/sanity/run.mjs build",
+    "sanity:deploy": "node ./scripts/sanity/run.mjs deploy",
     "astro": "astro"
   },
   "dependencies": {
@@ -26,10 +29,15 @@
     "@tailwindcss/vite": "^4.2.1",
     "astro": "^6.0.3",
     "resend": "^6.9.3",
+    "styled-components": "^6.3.11",
     "tailwindcss": "^4.2.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.7",
+    "@sanity/vision": "^3.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sanity": "^3.0.0",
     "sharp": "^0.34.5",
     "typescript": "^5.9.3",
     "wrangler": "^4.72.0"

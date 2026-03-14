@@ -84,7 +84,8 @@ const { title, description } = Astro.props;
         if (statusEl) statusEl.textContent = '✓ Sent. We will reply soon.';
         form.reset();
       } else {
-        if (statusEl) statusEl.textContent = 'Submission failed. Please try again later.';
+        const msg = typeof data?.message === 'string' && data.message.trim() ? data.message.trim() : null;
+        if (statusEl) statusEl.textContent = msg ?? 'Submission failed. Please try again later.';
       }
     } catch {
       if (statusEl) statusEl.textContent = 'Network error. Please try again later.';

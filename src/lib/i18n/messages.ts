@@ -110,12 +110,12 @@ type Namespace = keyof (typeof messages)['zh-cn'];
 export function t(locale: SupportedLocale, ns: Namespace, key: string) {
   const lang = messages[locale] ?? messages['zh-cn'];
   const section = (lang as any)[ns] ?? (messages['zh-cn'] as any)[ns];
-  return section?.[key] ?? '';
+  return String(section?.[key] ?? '');
 }
 
 export function getLocaleLabel(locale: SupportedLocale) {
   if (locale === 'zh-cn') return '中文';
   if (locale === 'en') return 'EN';
   if (locale === 'es') return 'ES';
-  return locale.toUpperCase();
+  return (locale as string).toUpperCase();
 }
