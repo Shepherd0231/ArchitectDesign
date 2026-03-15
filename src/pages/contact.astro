@@ -127,7 +127,8 @@ export const prerender = true;
         if (statusEl) statusEl.textContent = '提交成功，我们将尽快与您联系。';
         form.reset();
       } else {
-        if (statusEl) statusEl.textContent = '提交失败，请稍后重试或通过邮箱/WhatsApp 联系我们。';
+        const msg = typeof data?.message === 'string' && data.message.trim() ? data.message.trim() : null;
+        if (statusEl) statusEl.textContent = msg ?? '提交失败，请稍后重试或通过邮箱/WhatsApp 联系我们。';
       }
     } catch {
       if (statusEl) statusEl.textContent = '网络异常，请稍后重试或通过邮箱/WhatsApp 联系我们。';

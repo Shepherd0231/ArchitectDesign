@@ -82,7 +82,13 @@ export const onRequestPost = async (context: any) => {
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     '';
   const userAgent = clamp(request.headers.get('user-agent') ?? '', 400);
-  const createdAt = new Date().toISOString();
+
+  const resendApiKey = asString(env.RESEND_API_KEY);
+  const resendFrom = asString(env.RESEND_FROM);
+  const resendTo = asString(env.RESEND_TO);
+  if (!resendApiKey || !resendFrom || !resendTo) {
+    return json({ success: false, error: 'EMAIL_CONFIG_MISSING', message: t.failed }, { status: 500 });
+  }
 
   try {
     const recent = await env.FORMS_DB.prepare(
@@ -128,7 +134,13 @@ export const onRequestPost = async (context: any) => {
     return json({ success: false, error: 'DB_INSERT_FAILED', message: t.failed }, { status: 500 });
   }
 
-  const resend = new Resend(env.RESEND_API_KEY);
+  let resend: Resend;
+  try {
+    resend = new Resend(resendApiKey);
+  } catch {
+    return json({ success: false, error: 'EMAIL_CONFIG_MISSING', message: t.failed }, { status: 500 });
+  }
+
   const adminHtml = `
     <h2>New Website Contact</h2>
     <p><strong>Name:</strong> ${name}</p>
@@ -143,8 +155,8 @@ export const onRequestPost = async (context: any) => {
 
   try {
     await resend.emails.send({
-      from: env.RESEND_FROM,
-      to: env.RESEND_TO,
+      from: resendFrom,
+      to: resendTo,
       subject: `New Website Inquiry: ${name}`,
       html: adminHtml,
       replyTo: email,
@@ -161,7 +173,7 @@ export const onRequestPost = async (context: any) => {
         : `<p>Hi ${name}, thanks for reaching out. We'll reply within 24 hours.</p>`;
     try {
       await resend.emails.send({
-        from: env.RESEND_FROM,
+        from: resendFrom,
         to: email,
         subject: locale.toLowerCase().startsWith('zh') ? '我们已收到您的咨询' : 'We received your message',
         html: replyHtml,
