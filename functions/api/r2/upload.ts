@@ -27,6 +27,10 @@ function originAllowed(origin: string, allowlist: string) {
   return false;
 }
 
+function isLocalDevOrigin(origin: string) {
+  return /^http:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/i.test(origin);
+}
+
 function cors(request: Request, env: any) {
   const origin = request.headers.get('origin') ?? '';
   const allowlist = (env.R2_UPLOAD_ALLOWED_ORIGINS as string | undefined) ?? '';
@@ -34,6 +38,7 @@ function cors(request: Request, env: any) {
 
   const allowOrigin = (() => {
     if (!origin) return '';
+    if (isLocalDevOrigin(origin)) return origin;
     if (uploadToken) return origin;
     if (!allowlist) return '';
     return originAllowed(origin, allowlist) ? origin : '';
@@ -47,12 +52,18 @@ function cors(request: Request, env: any) {
     headers: {
       ...(allowOrigin ? { 'access-control-allow-origin': allowOrigin } : {}),
       ...(allowOrigin ? { vary: 'origin' } : {}),
-      'access-control-allow-methods': 'POST, OPTIONS',
+      'access-control-allow-methods': 'GET, POST, OPTIONS',
       'access-control-allow-headers': requestHeaders,
       'access-control-max-age': '86400',
     } as Record<string, string>,
   };
 }
+
+export const onRequestGet = async (context: any) => {
+  const { request, env } = context as { request: Request; env: any };
+  const c = cors(request, env);
+  return json({ success: false, error: 'METHOD_NOT_ALLOWED' }, { status: 405, headers: c.headers });
+};
 
 export const onRequestOptions = async (context: any) => {
   const { request, env } = context as { request: Request; env: any };
