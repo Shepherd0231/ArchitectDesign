@@ -30,7 +30,15 @@ function originAllowed(origin: string, allowlist: string) {
 function cors(request: Request, env: any) {
   const origin = request.headers.get('origin') ?? '';
   const allowlist = (env.R2_UPLOAD_ALLOWED_ORIGINS as string | undefined) ?? '';
-  const allowOrigin = origin && allowlist && originAllowed(origin, allowlist) ? origin : '';
+  const uploadToken = (env.R2_UPLOAD_TOKEN as string | undefined) ?? '';
+
+  const allowOrigin = (() => {
+    if (!origin) return '';
+    if (uploadToken) return origin;
+    if (!allowlist) return '';
+    return originAllowed(origin, allowlist) ? origin : '';
+  })();
+
   const requestHeaders =
     request.headers.get('access-control-request-headers') ?? 'content-type, authorization';
 
