@@ -86,8 +86,14 @@ export const onRequestPost = async (context: any) => {
   const resendApiKey = asString(env.RESEND_API_KEY);
   const resendFrom = asString(env.RESEND_FROM);
   const resendTo = asString(env.RESEND_TO);
-  if (!resendApiKey || !resendFrom || !resendTo) {
-    return json({ success: false, error: 'EMAIL_CONFIG_MISSING', message: t.failed }, { status: 500 });
+
+  const missing: string[] = [];
+  if (!resendApiKey) missing.push('RESEND_API_KEY');
+  if (!resendFrom) missing.push('RESEND_FROM');
+  if (!resendTo) missing.push('RESEND_TO');
+
+  if (missing.length) {
+    return json({ success: false, error: 'EMAIL_CONFIG_MISSING', message: t.failed, missing }, { status: 500 });
   }
 
   try {
