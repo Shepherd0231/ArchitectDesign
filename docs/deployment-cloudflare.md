@@ -19,6 +19,8 @@
 - R2 图片 CDN（推荐）
   - `R2_PUBLIC_URL`：R2 Bucket 的公网访问域名（自定义域或官方域）
   - `R2_PREFIX`：资源前缀（示例：`images`）
+  - `R2_ACCOUNT_ID`、`R2_ACCESS_KEY_ID`、`R2_SECRET_ACCESS_KEY`、`R2_BUCKET_NAME`（仅用于上传 API/脚本）
+  - `R2_UPLOAD_TOKEN`、`R2_UPLOAD_ALLOWED_ORIGINS`（用于 Studio 上传到 R2 的接口鉴权）
 - Resend 邮件（表单通知）
   - `RESEND_API_KEY`、`RESEND_FROM`、`RESEND_TO`、`RESEND_REPLY_ENABLED`
 
@@ -89,6 +91,18 @@
 - 建桶、绑定自定义域（HTTPS）
 - 按命名规范生成多尺寸文件（如 `file-480.jpg, file-800.jpg, file-1200.jpg, file-1920.jpg`）
 - 上传脚本参考：`scripts/images/r2-upload.mjs`
+
+#### 7.1) Sanity Studio 上传到 R2（推荐）
+目标：图片文件上传到 R2，Sanity 文档只保存 `r2://...` URL。
+
+- Pages Functions：`POST /api/r2/upload`
+- Pages 侧变量：
+  - `R2_ACCOUNT_ID`、`R2_ACCESS_KEY_ID`、`R2_SECRET_ACCESS_KEY`、`R2_BUCKET_NAME`
+  - `R2_PUBLIC_URL`、`R2_PREFIX`
+  - `R2_UPLOAD_TOKEN`、`R2_UPLOAD_ALLOWED_ORIGINS`
+- Studio 侧变量：
+  - `SANITY_STUDIO_R2_UPLOAD_URL`
+  - `SANITY_STUDIO_R2_UPLOAD_TOKEN`
 
 ### 8) 多语言与静态优化
 - `astro.config.mjs` 已启用 `trailingSlash: "always"` 与内置 i18n

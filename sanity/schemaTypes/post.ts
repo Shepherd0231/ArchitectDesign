@@ -1,3 +1,5 @@
+import { R2UrlInput } from '../components/R2UrlInput';
+
 export const post = {
   name: 'post',
   title: 'Post',
@@ -9,10 +11,15 @@ export const post = {
     { name: 'publishDate', type: 'datetime', title: 'Publish Date' },
     { name: 'author', type: 'string', title: 'Author' },
     { name: 'tags', type: 'array', of: [{ type: 'string' }] },
-    { name: 'coverImage', type: 'image', title: 'Cover Image', options: { hotspot: true } },
-    { name: 'coverImageUrl', type: 'url', title: 'Cover Image URL' },
+    { name: 'coverImage', type: 'image', title: 'Cover Image', options: { hotspot: true }, hidden: true },
+    {
+      name: 'coverImageUrl',
+      type: 'string',
+      title: 'Cover Image URL',
+      components: { input: R2UrlInput },
+    },
     { name: 'coverImageMeta', type: 'imageMeta', title: 'Cover Image Metadata' },
-    { name: 'body', type: 'array', of: [{ type: 'block' }, { type: 'image' }] },
+    { name: 'body', type: 'array', of: [{ type: 'block' }, { type: 'externalImage' }] },
     { name: 'seo', type: 'seo', title: 'SEO Metadata' },
   ],
 };

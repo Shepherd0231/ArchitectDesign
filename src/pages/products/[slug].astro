@@ -10,6 +10,30 @@ import { resolveImageUrl } from '../../lib/content/images';
 
 export const prerender = true;
 
+function escapeAttr(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+}
+
+function renderPortableText(value: unknown) {
+  return toHTML(value as any, {
+    components: {
+      types: {
+        externalImage: ({ value }: any) => {
+          const url = typeof value?.url === 'string' ? value.url : '';
+          const resolved = resolveImageUrl(url) ?? url;
+          const alt = typeof value?.meta?.alt === 'string' ? value.meta.alt : '';
+          if (!resolved) return '';
+          return `<img src="${escapeAttr(resolved)}" alt="${escapeAttr(alt)}" loading="lazy" />`;
+        },
+      },
+    },
+  });
+}
+
 export async function getStaticPaths() {
   if (sanityAvailable()) {
     const cases = await fetchCases('zh');
@@ -69,7 +93,7 @@ if (useSanity) {
     location = caseItem.location;
     year = caseItem.year;
     tags = caseItem.tags;
-    bodyHtml = toHTML((caseItem as any).body ?? []);
+    bodyHtml = renderPortableText((caseItem as any).body ?? []);
     keywords = tags;
   }
 } else {

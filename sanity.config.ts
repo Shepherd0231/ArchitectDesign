@@ -2,6 +2,7 @@ import { defineConfig } from 'sanity';
 import { deskTool } from 'sanity/desk';
 import { visionTool } from '@sanity/vision';
 import { schemaTypes } from './sanity/schema';
+import { MarkdownImportAction } from './sanity/components/MarkdownImportAction';
 
 const projectId =
   process.env.SANITY_STUDIO_PROJECT_ID ||
@@ -26,6 +27,14 @@ export default defineConfig({
   projectId,
   dataset,
   plugins: [deskTool(), visionTool()],
+  document: {
+    actions: (prev, ctx) => {
+      if (ctx.schemaType === 'post' || ctx.schemaType === 'case') {
+        return [...prev, MarkdownImportAction];
+      }
+      return prev;
+    },
+  },
   schema: {
     types: schemaTypes,
   },

@@ -67,11 +67,22 @@ R2_PUBLIC_URL=https://pub-xxx.r2.dev
 R2_PREFIX=images
 ```
 
+#### 3.1) Sanity Studio 上传到 R2（URL 存文档）
+目标：在 Studio 里选择图片文件后，图片上传到 R2，文档只保存 `r2://...` URL，不使用 Sanity Asset。
+
+- 上传接口：`POST /api/r2/upload`（Pages Functions）
+- Studio 环境变量：
+  - `SANITY_STUDIO_R2_UPLOAD_URL=https://<你的域名>/api/r2/upload`
+  - `SANITY_STUDIO_R2_UPLOAD_TOKEN=<随机 token>`
+- Pages 环境变量：
+  - `R2_UPLOAD_TOKEN=<同一个 token>`
+  - `R2_UPLOAD_ALLOWED_ORIGINS=http://localhost:3334,https://*.sanity.studio,https://<你的域名>`
+
 ### 4) CMS（Sanity）图片字段记录规范
 
-Sanity 侧建议同时支持两种输入：
-- `coverImage`（Sanity Asset）：适合 Studio 内直接上传
+Sanity 侧建议以 URL 为主：
 - `coverImageUrl`（URL）：适合 R2/Unsplash/外链
+- `coverImage`（Sanity Asset）：若不希望图片入 Sanity，可隐藏或移除
 
 配套元数据字段：
 - `coverImageMeta.sourceType`：sanity/r2/unsplash/ai/stock/photo/external
@@ -86,4 +97,3 @@ Sanity 侧建议同时支持两种输入：
 用于快速生成可追溯的占位图 URL 和归因信息：
 - 使用脚本 `npm run images:unsplash -- --query "architecture minimal"` 获取 URL 与作者信息
 - 将 URL 写入 `coverImageUrl`，并填写 `coverImageMeta.unsplashId/sourceUrl/credit/license`
-
