@@ -10,8 +10,8 @@ type UploadResponse =
 export function R2UrlInput(props: StringInputProps) {
   const { value, onChange, readOnly } = props;
 
-  const endpoint = (import.meta.env.SANITY_STUDIO_R2_UPLOAD_URL as string | undefined) ?? '';
-  const token = (import.meta.env.SANITY_STUDIO_R2_UPLOAD_TOKEN as string | undefined) ?? '';
+  const endpoint = ((import.meta.env.SANITY_STUDIO_R2_UPLOAD_URL as string | undefined) ?? '').trim();
+  const token = ((import.meta.env.SANITY_STUDIO_R2_UPLOAD_TOKEN as string | undefined) ?? '').trim();
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);

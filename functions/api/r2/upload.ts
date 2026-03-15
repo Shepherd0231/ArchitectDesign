@@ -55,6 +55,7 @@ function cors(request: Request, env: any) {
       'access-control-allow-methods': 'GET, POST, OPTIONS',
       'access-control-allow-headers': requestHeaders,
       'access-control-max-age': '86400',
+      'x-r2-upload': '1',
     } as Record<string, string>,
   };
 }
@@ -62,7 +63,22 @@ function cors(request: Request, env: any) {
 export const onRequestGet = async (context: any) => {
   const { request, env } = context as { request: Request; env: any };
   const c = cors(request, env);
-  return json({ success: false, error: 'METHOD_NOT_ALLOWED' }, { status: 405, headers: c.headers });
+  return json(
+    {
+      success: true,
+      route: '/api/r2/upload',
+      allowOrigin: c.allowOrigin || null,
+      origin: request.headers.get('origin') ?? null,
+      hasUploadToken: Boolean((env.R2_UPLOAD_TOKEN as string | undefined) ?? ''),
+      hasR2Config: Boolean(
+        (env.R2_ACCOUNT_ID as string | undefined) &&
+          (env.R2_ACCESS_KEY_ID as string | undefined) &&
+          (env.R2_SECRET_ACCESS_KEY as string | undefined) &&
+          (env.R2_BUCKET_NAME as string | undefined),
+      ),
+    },
+    { status: 200, headers: c.headers },
+  );
 };
 
 export const onRequestOptions = async (context: any) => {
