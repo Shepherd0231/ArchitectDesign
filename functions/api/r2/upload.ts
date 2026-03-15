@@ -28,7 +28,7 @@ function originAllowed(origin: string, allowlist: string) {
 }
 
 function isLocalDevOrigin(origin: string) {
-  return /^http:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/i.test(origin);
+  return /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/i.test(origin);
 }
 
 function cors(request: Request, env: any) {
@@ -37,7 +37,7 @@ function cors(request: Request, env: any) {
   const uploadToken = (env.R2_UPLOAD_TOKEN as string | undefined) ?? '';
 
   const allowOrigin = (() => {
-    if (!origin) return '';
+    if (!origin) return uploadToken ? '*' : '';
     if (isLocalDevOrigin(origin)) return origin;
     if (uploadToken) return origin;
     if (!allowlist) return '';
