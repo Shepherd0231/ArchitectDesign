@@ -367,7 +367,9 @@ export const MarkdownImportAction: DocumentActionComponent = (props) => {
 
   const supported = useMemo(() => type === 'post' || type === 'case', [type]);
   const doc = draft ?? published;
-  const endpoint = ((import.meta.env.SANITY_STUDIO_R2_UPLOAD_URL as string | undefined) ?? '').trim();
+  const endpoint = ((import.meta.env.SANITY_STUDIO_R2_UPLOAD_URL as string | undefined) ?? '')
+    .trim()
+    .replace(/\/+$/g, '');
   const token = ((import.meta.env.SANITY_STUDIO_R2_UPLOAD_TOKEN as string | undefined) ?? '').trim();
 
   if (!supported) return null;
